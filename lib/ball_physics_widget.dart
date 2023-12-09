@@ -22,7 +22,7 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   DateTime? lastFrameTime;
   static const int fpsAverageCount = 60; // Average over 60 frames
   final List<double> _fpsValues = [];
-
+  int speed = 100;
   @override
   void initState() {
     super.initState();
@@ -50,7 +50,7 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
       position: Offset(size.width / 2,
           size.height / 2), // Set position to center of provided size
       velocity:
-          Offset(random.nextDouble() * 8 - 2, random.nextDouble() * 8 - 2),
+          Offset(random.nextDouble() * speed - 2, random.nextDouble() * speed - 2),
       color: Color.fromRGBO(
           random.nextInt(256), random.nextInt(256), random.nextInt(256), 1),
       radius: 20,
