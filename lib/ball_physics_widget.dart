@@ -22,7 +22,8 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   DateTime? lastFrameTime;
   static const int fpsAverageCount = 60; // Average over 60 frames
   final List<double> _fpsValues = [];
-  int speed = 100;
+  int speed = 10;
+  Duration noSpawnDuration = const Duration(milliseconds: 100);
   @override
   void initState() {
     super.initState();
@@ -85,7 +86,7 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
 
       // Check for cooldown
       bool canSpawn =
-          DateTime.now().difference(ball.creationTime).inSeconds > 1;
+          DateTime.now().difference(ball.creationTime) > noSpawnDuration;
 
       // Check for boundary collisions
       if (ball.position.dx - ball.radius < 0 ||
