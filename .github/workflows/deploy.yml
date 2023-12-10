@@ -26,7 +26,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Flutter Web
-        run: flutter build web --release --base-href "/bouncy_ball_physics/"
+        run: flutter build web --release --base-href "/bouncy_ball_physics/" --web-renderer canvaskit
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
