@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bouncy_ball_physics/ball.dart';
+import 'package:bouncy_ball_physics/trail_shape_selector.dart';
 import 'package:flutter/material.dart';
 
 import 'ball_painter.dart';
@@ -19,17 +20,20 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   Random random = Random();
   ValueNotifier<int> ballCountNotifier = ValueNotifier(1);
   ValueNotifier<double> fpsNotifier = ValueNotifier(0.0);
+  ValueNotifier<TrailShape> trailShapeNotifier = ValueNotifier(TrailShape.line);
   DateTime? lastFrameTime;
   static const int fpsAverageCount = 60; // Average over 60 frames
   final List<double> _fpsValues = [];
+  int ballLimit = 100;
   int speed = 10;
+  int tailLength = 100;
   Duration noSpawnDuration = const Duration(milliseconds: 100);
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 16))
-          ..repeat();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 16))
+      ..repeat();
     // resetBalls();
   }
 
@@ -50,8 +54,8 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
     return Ball(
       position: Offset(size.width / 2,
           size.height / 2), // Set position to center of provided size
-      velocity:
-          Offset(random.nextDouble() * speed - 2, random.nextDouble() * speed - 2),
+      velocity: Offset(
+          random.nextDouble() * speed - 2, random.nextDouble() * speed - 2),
       color: Color.fromRGBO(
           random.nextInt(256), random.nextInt(256), random.nextInt(256), 1),
       radius: 20,
@@ -78,15 +82,16 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
     for (var ball in balls) {
       ball.position += ball.velocity;
 
-      // // Update the trail
-      // ball.trail.add(ball.position);
-      // if (ball.trail.length > 200) {
-      //   ball.trail.removeAt(0);
-      // }
+      // Update the trail
+      ball.trail.add(ball.position);
+      if (ball.trail.length > tailLength) {
+        ball.trail.removeAt(0);
+      }
 
       // Check for cooldown
       bool canSpawn =
-          DateTime.now().difference(ball.creationTime) > noSpawnDuration;
+          DateTime.now().difference(ball.creationTime) > noSpawnDuration &&
+              ballCountNotifier.value < ballLimit;
 
       // Check for boundary collisions
       if (ball.position.dx - ball.radius < 0 ||
@@ -133,29 +138,37 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            ValueListenableBuilder<int>(
-              valueListenable: ballCountNotifier,
-              builder: (context, count, child) {
-                return Text(
-                  'Balls: $count',
-                  style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                );
-              },
+            Expanded(
+                flex: 2,
+                child:
+                    TrailShapeSelector(trailShapeNotifier: trailShapeNotifier)),
+            Expanded(
+              child: ValueListenableBuilder<int>(
+                valueListenable: ballCountNotifier,
+                builder: (context, count, child) {
+                  return Text(
+                    'Balls: $count',
+                    style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                  );
+                },
+              ),
             ),
-            ValueListenableBuilder<double>(
-              valueListenable: fpsNotifier,
-              builder: (context, fps, child) {
-                return Text(
-                  'FPS: ${fps.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                );
-              },
+            Expanded(
+              child: ValueListenableBuilder<double>(
+                valueListenable: fpsNotifier,
+                builder: (context, fps, child) {
+                  return Text(
+                    'FPS: ${fps.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -164,16 +177,21 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
             decoration: BoxDecoration(
                 // color: Colors.black,
                 border: Border.all()),
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                _updatePhysics(context);
-                return CustomPaint(
-                  painter: BallPainter(balls: balls),
-                  child: Container(),
-                );
-              },
-            ),
+            child: ValueListenableBuilder<TrailShape>(
+                valueListenable: trailShapeNotifier,
+                builder: (context, trailShape, child) {
+                  return AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      _updatePhysics(context);
+                      return CustomPaint(
+                        painter:
+                            BallPainter(balls: balls, trailShape: trailShape),
+                        child: Container(),
+                      );
+                    },
+                  );
+                }),
           ),
         ),
       ],
