@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Get the branch name
@@ -27,26 +27,15 @@ jobs:
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/bouncy_ball_physics/" --web-renderer canvaskit
 
-      - name: setup chrome
-        uses: nanasess/setup-chromedriver@v2
-
-      - name: 🪛 Start Chromedriver
+      - name: 🚀 Start Safari Driver
         run: |
-          export DISPLAY=:99
-          chromedriver --url-base=/wd/hub --port=4444 --verbose &
-          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+          sudo safaridriver --enable
+          safaridriver --port 4444 &
 
-      - name: 📢 Check Chromedriver Version
-        run: chromedriver -v
-
-      - name: ⏳ Delay
-        run: |
-          echo "Waiting for Chromedriver to start..."
-          sleep 15
 
       - name: 🚀 Run Integration Test
         run: |
-          flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart
+          flutter drive --verbose-system-logs -d web-server --release --browser-name=safari --driver=test_driver/integration_test.dart --target=integration_test/test.dart
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
