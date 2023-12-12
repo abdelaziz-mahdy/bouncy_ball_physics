@@ -13,6 +13,14 @@
 - **Responsive Design**: Adjusts to various screen sizes and orientations.
 - **Reset Functionality**: A button to reset the animation and start afresh.
 
+## Screenshots
+
+| Trail Shape         | Screenshot                          |
+|---------------------|-------------------------------------|
+| Line                | ![Line](screenshots/test-Line.png)  |
+| Single Triangle     | ![Single Triangle](screenshots/test-Single Triangle.png) |
+| Multiple Triangles  | ![Multiple Triangles](screenshots/test-Multiple Triangles.png) |
+
 ## Getting Started
 
 ### Prerequisites
