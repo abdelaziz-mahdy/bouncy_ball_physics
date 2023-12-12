@@ -12,6 +12,11 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding();
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   group('Test App', () {
+    testWidgets('Test without take screenshot', (tester) async {
+      await tester.pumpWidget(MyApp());
+      await tester.pumpAndSettle();
+      print('hello');
+    });
     testWidgets('Test with take screenshot', (tester) async {
       await tester.pumpWidget(MyApp());
       await tester.pumpAndSettle();
