@@ -23,7 +23,7 @@ void main() {
         await tester.tap(find.text(label),warnIfMissed: false);
       await tester.pumpFrames(App, Duration(seconds: 1));
 
-        await takeScreenshot("test-${label}",tester, binding);
+        await takeScreenshot("test-${label}".replaceAll(" ", "-"),tester, binding);
       }
     });
   });

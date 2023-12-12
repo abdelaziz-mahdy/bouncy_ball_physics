@@ -18,8 +18,8 @@
 | Trail Shape         | Screenshot                          |
 |---------------------|-------------------------------------|
 | Line                | ![Line](screenshots/test-Line.png)  |
-| Single Triangle     | ![Single Triangle](screenshots/test-Single Triangle.png) |
-| Multiple Triangles  | ![Multiple Triangles](screenshots/test-Multiple Triangles.png) |
+| Single Triangle     | ![Single Triangle](screenshots/test-Single-Triangle.png) |
+| Multiple Triangles  | ![Multiple Triangles](screenshots/test-Multiple-Triangles.png) |
 
 ## Getting Started
 
