@@ -35,7 +35,9 @@ jobs:
         run: |
           chromedriver --port=4444 --trace-buffer-size=100000 &
           flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart
-      
+      - name: List all directories and files
+        run: |
+          ls -lR
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
