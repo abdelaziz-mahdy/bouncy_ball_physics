@@ -27,9 +27,26 @@ jobs:
 
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/bouncy_ball_physics/" --web-renderer canvaskit
-
+      
+      - name: Take screenshots
+        uses: nanasess/setup-chromedriver@v2
+        with:
+          # Optional: do not specify to match Chrome's version
+          chromedriver-version: '88.0.4324.96'
+      - name: 🎯 Run Functional Test
+        run: |
+          chromedriver --port=4444 --trace-buffer-size=100000 &
+          flutter drive --driver=test_driver/integration_test.dart --target=integration_test/test.dart -d web-server --release 
+      
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
+      - name: Auto Commit
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Chore: update screenshot"
+          file_pattern: "**/*.png"
+          repository: .
+          skip_fetch: false

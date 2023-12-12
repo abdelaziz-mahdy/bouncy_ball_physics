@@ -1,19 +1,19 @@
 import 'package:bouncy_ball_physics/ball_physics_widget.dart';
 import 'package:flutter/material.dart';
 
-
 void main() {
-  runApp(MaterialApp(home: BallPhysicsScreen()));
+  runApp(MyApp());
 }
 
-class BallPhysicsScreen extends StatelessWidget {
-    final GlobalKey<BallPhysicsWidgetState> ballPhysicsKey = GlobalKey();
+class MyApp extends StatelessWidget {
+  final GlobalKey<BallPhysicsWidgetState> ballPhysicsKey = GlobalKey();
 
-  BallPhysicsScreen({super.key});
+  MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return MaterialApp(
+        home: Scaffold(
       appBar: AppBar(title: const Text('Ball Physics')),
       body: BallPhysicsWidget(key: ballPhysicsKey), // Use the key here
       floatingActionButton: FloatingActionButton(
@@ -23,6 +23,6 @@ class BallPhysicsScreen extends StatelessWidget {
         },
         child: const Icon(Icons.refresh),
       ),
-    );
+    ));
   }
 }
