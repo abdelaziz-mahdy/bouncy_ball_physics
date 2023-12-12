@@ -30,9 +30,7 @@ jobs:
       
       - name: Take screenshots
         uses: nanasess/setup-chromedriver@v2
-        with:
-          # Optional: do not specify to match Chrome's version
-          chromedriver-version: '88.0.4324.96'
+
       - name: 🎯 Run Functional Test
         run: |
           chromedriver --port=4444 --trace-buffer-size=100000 &
