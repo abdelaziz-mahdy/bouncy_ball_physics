@@ -6,10 +6,9 @@ import 'package:integration_test/integration_test.dart';
 
 import 'package:bouncy_ball_physics/main.dart';
 
-
-
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding();
+  print("Running integration tests on ${Platform.operatingSystem}");
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   group('Test App', () {
     testWidgets('Test without take screenshot', (tester) async {
@@ -25,6 +24,7 @@ void main() {
     });
   });
 }
+
 takeScreenshot(tester, binding) async {
   if (kIsWeb) {
     await binding.takeScreenshot('test-screenshot');

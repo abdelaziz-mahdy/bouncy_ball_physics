@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Get the branch name
@@ -21,22 +21,21 @@ jobs:
           channel: "stable"
           cache: true
 
+
       - name: Install Flutter Dependencies
         run: flutter pub get
 
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/bouncy_ball_physics/" --web-renderer canvaskit
+      
+      - name: setup chrome
+        uses: nanasess/setup-chromedriver@v2
 
-      - name: 🚀 Start Safari Driver
+      - name: 🎯 Run Functional Test
         run: |
-          sudo safaridriver --enable
-          safaridriver --port 4444 &
-
-
-      - name: 🚀 Run Integration Test
-        run: |
-          flutter drive --verbose-system-logs -d web-server --release --browser-name=safari --driver=test_driver/integration_test.dart --target=integration_test/test.dart
-
+          chromedriver --port=4444 --trace-buffer-size=100000 &
+          flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart
+      
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
