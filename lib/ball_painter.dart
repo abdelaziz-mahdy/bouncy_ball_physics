@@ -1,5 +1,4 @@
 import 'package:bouncy_ball_physics/ball.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 enum TrailShape {

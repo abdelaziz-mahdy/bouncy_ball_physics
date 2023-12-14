@@ -10,26 +10,30 @@ import 'package:bouncy_ball_physics/main.dart';
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding();
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  const String screenshotMode =
+      String.fromEnvironment('SCREENSHOT_MODE', defaultValue: 'desktop');
+
   group('Test App', () {
     testWidgets('Test with take screenshot', (tester) async {
-      Widget App= MyApp();
-      await tester.pumpFrames(App, Duration(seconds: 5));
+      Widget App = MyApp();
+      await tester.pumpFrames(App, const Duration(seconds: 5));
 
       // Define the labels for the ChoiceChips
       var labels = ['Line', 'Single Triangle', 'Multiple Triangles'];
 
       // Tap each ChoiceChip and check if the trailShapeNotifier updates correctly
       for (var label in labels) {
-        await tester.tap(find.text(label),warnIfMissed: false);
-      await tester.pumpFrames(App, Duration(seconds: 1));
+        await tester.tap(find.text(label), warnIfMissed: false);
+        await tester.pumpFrames(App, const Duration(seconds: 1));
 
-        await takeScreenshot("test-${label}".replaceAll(" ", "-"),tester, binding);
+        await takeScreenshot(
+            "test-$label-screenshotMode".replaceAll(" ", "-"), tester, binding);
       }
     });
   });
 }
 
-takeScreenshot(name,tester, binding) async {
+takeScreenshot(name, tester, binding) async {
   if (kIsWeb) {
     await binding.takeScreenshot(name);
     return;
