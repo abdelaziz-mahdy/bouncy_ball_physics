@@ -31,10 +31,17 @@ jobs:
       - name: setup chrome
         uses: nanasess/setup-chromedriver@v2
 
-      - name: 🎯 Run Functional Test
+      - name: run chrome 
+        run: chromedriver --port=4444 --trace-buffer-size=100000 &
+      - name: 🎯 Take desktop screenshots
         run: |
-          chromedriver --port=4444 --trace-buffer-size=100000 &
-          flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart
+          sudo Xvfb -ac :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & # Adjust the resolution as needed for desktop
+          flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=desktop
+      - name: 🎯 Take mobile screenshots
+        run: |
+          sudo Xvfb -ac :99 -screen 0 375x667x24 > /dev/null 2>&1 & # Adjust the resolution as needed for mobile
+          flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
+
       - name: List all directories and files
         run: |
           ls -lR
