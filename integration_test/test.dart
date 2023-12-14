@@ -27,7 +27,7 @@ void main() {
         await tester.pumpFrames(App, const Duration(seconds: 1));
 
         await takeScreenshot(
-            "test-$label-screenshotMode".replaceAll(" ", "-"), tester, binding);
+            "test-$label-$screenshotMode".replaceAll(" ", "-"), tester, binding);
       }
     });
   });
