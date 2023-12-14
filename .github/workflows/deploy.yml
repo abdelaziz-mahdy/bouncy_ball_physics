@@ -21,13 +21,12 @@ jobs:
           channel: "stable"
           cache: true
 
-
       - name: Install Flutter Dependencies
         run: flutter pub get
 
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/bouncy_ball_physics/" --web-renderer canvaskit
-      
+
       - name: setup chrome
         uses: nanasess/setup-chromedriver@v2
 
@@ -50,7 +49,6 @@ jobs:
           repository: .
           skip_fetch: false
 
-
   android_screenshots:
     name: Android_screenshots
     runs-on: macos-latest
@@ -62,7 +60,7 @@ jobs:
     steps:
       - uses: actions/setup-java@v1
         with:
-          java-version: '11'
+          java-version: "11"
       - uses: actions/checkout@v2
         with:
           submodules: "true"
@@ -70,15 +68,34 @@ jobs:
         with:
           channel: "stable"
           cache: true
-      - run: flutter pub get
-      - name: Run integration tests
+      - name: AVD cache
+        uses: actions/cache@v3
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          target: ${{ matrix.target }}
           api-level: ${{ matrix.api-level }}
-          arch: x86_64
-          profile: Nexus 6
-          script: cd example && flutter pub get && flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: flutter pub get && flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
+
       - name: Auto Commit
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
