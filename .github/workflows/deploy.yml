@@ -32,14 +32,13 @@ jobs:
         uses: nanasess/setup-chromedriver@v2
 
       - name: run chrome 
-        run: chromedriver --port=4444 --trace-buffer-size=100000 &
+        run: chromedriver --port=4444 --trace-buffer-size=100000 --window-size=1920x1080 &
       - name: 🎯 Take desktop screenshots
         run: |
-          sudo Xvfb -ac :99 -screen 0 1920x1080x24 > /dev/null 2>&1 & # Adjust the resolution as needed for desktop
           flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=desktop
       - name: 🎯 Take mobile screenshots
         run: |
-          sudo Xvfb -ac :99 -screen 0 375x667x24 > /dev/null 2>&1 & # Adjust the resolution as needed for mobile
+          chromedriver --port=4444 --trace-buffer-size=100000 --window-size=375x667 &
           flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
 
       - name: List all directories and files
