@@ -7,6 +7,7 @@ on:
 
 jobs:
   build_web:
+    name: Build Flutter Web, Take Screenshots and Deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -50,7 +51,7 @@ jobs:
           skip_fetch: false
 
   android_screenshots:
-    name: Android_screenshots
+    name: Take Android Screenshots
     runs-on: macos-latest
     strategy:
       matrix:
@@ -101,7 +102,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: flutter pub get && flutter drive --verbose-system-logs -d android --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
+          script: flutter pub get && flutter drive --verbose-system-logs -d emulator-5554 --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
 
       - name: Auto Commit
         uses: stefanzweifel/git-auto-commit-action@v4
