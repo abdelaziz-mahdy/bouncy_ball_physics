@@ -15,11 +15,11 @@
 
 ## Screenshots
 
-| Trail Shape         | Screenshot                          |
-|---------------------|-------------------------------------|
-| Line                | ![Line](screenshots/test-Line.png)  |
-| Single Triangle     | ![Single Triangle](screenshots/test-Single-Triangle.png) |
-| Multiple Triangles  | ![Multiple Triangles](screenshots/test-Multiple-Triangles.png) |
+| Trail Shape         | Desktop Screenshot                                     | Mobile Screenshot                                       |
+|---------------------|--------------------------------------------------------|---------------------------------------------------------|
+| Line                | ![Line Desktop](screenshots/test-Line-desktop.png)     | ![Line Mobile](screenshots/test-Line-mobile.png)        |
+| Single Triangle     | ![Single Triangle Desktop](screenshots/test-Single-Triangle-desktop.png) | ![Single Triangle Mobile](screenshots/test-Single-Triangle-mobile.png) |
+| Multiple Triangles  | ![Multiple Triangles Desktop](screenshots/test-Multiple-Triangles-desktop.png) | ![Multiple Triangles Mobile](screenshots/test-Multiple-Triangles-mobile.png) |
 
 ## Getting Started
 

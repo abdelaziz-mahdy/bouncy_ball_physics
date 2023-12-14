@@ -31,14 +31,18 @@ jobs:
       - name: setup chrome
         uses: nanasess/setup-chromedriver@v2
 
-      - name: run chrome 
+      - name: run chrome desktop screen
         run: chromedriver --port=4444 --trace-buffer-size=100000 --window-size=1920x1080 &
       - name: 🎯 Take desktop screenshots
         run: |
           flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=desktop
+      - name: Kill ChromeDriver on Port 4444
+        run: |
+          lsof -t -i:4444 | xargs kill || true
+      - name: run chrome mobile screen
+        run: chromedriver --port=4444 --trace-buffer-size=100000 --window-size=375x667 &
       - name: 🎯 Take mobile screenshots
         run: |
-          chromedriver --port=4444 --trace-buffer-size=100000 --window-size=375x667 &
           flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
 
       - name: List all directories and files
