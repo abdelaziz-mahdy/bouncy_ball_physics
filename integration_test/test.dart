@@ -83,10 +83,14 @@ Future<void> takeScreenshot(
   IntegrationTestWidgetsFlutterBinding binding,
 ) async {
   await tester.pumpFrames(app, const Duration(seconds: 1));
-  if (Platform.isAndroid) {
-    await takeScreenshotForAndroid(binding, name);
-  } else {
+  if (kIsWeb) {
     await binding.takeScreenshot(name);
+  } else {
+    if (Platform.isAndroid) {
+      await takeScreenshotForAndroid(binding, name);
+    } else {
+      await binding.takeScreenshot(name);
+    }
   }
   print("Took screenshot: $name");
 }
