@@ -15,8 +15,8 @@ void main() {
 
   group('Test App', () {
     testWidgets('Test with take screenshot', (tester) async {
-      Widget App = MyApp();
-      await tester.pumpFrames(App, const Duration(seconds: 5));
+      Widget app = MyApp();
+      await tester.pumpFrames(app, const Duration(seconds: 5));
 
       // Define the labels for the ChoiceChips
       var labels = ['Line', 'Single Triangle', 'Multiple Triangles'];
@@ -24,22 +24,26 @@ void main() {
       // Tap each ChoiceChip and check if the trailShapeNotifier updates correctly
       for (var label in labels) {
         await tester.tap(find.text(label), warnIfMissed: false);
-        await tester.pumpFrames(App, const Duration(seconds: 1));
+        await tester.pumpFrames(app, const Duration(seconds: 1));
 
         await takeScreenshot(
-            "test-$label-$screenshotMode".replaceAll(" ", "-"), tester, binding);
+            app,
+            "test-$label-$screenshotMode".replaceAll(" ", "-"),
+            tester,
+            binding);
       }
     });
   });
 }
 
-takeScreenshot(name, tester, binding) async {
+takeScreenshot(Widget app, String name, WidgetTester tester,
+    IntegrationTestWidgetsFlutterBinding binding) async {
   if (kIsWeb) {
     await binding.takeScreenshot(name);
     return;
   } else if (Platform.isAndroid) {
     await binding.convertFlutterSurfaceToImage();
-    await tester.pumpAndSettle();
+    await tester.pumpFrames(app, const Duration(seconds: 1));
   }
   await binding.takeScreenshot(name);
 }
