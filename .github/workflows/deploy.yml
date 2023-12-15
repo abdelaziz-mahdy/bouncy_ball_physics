@@ -35,7 +35,7 @@ jobs:
         run: chromedriver --port=4444 --trace-buffer-size=100000 --window-size=1920x1080 &
       - name: 🎯 Take desktop screenshots
         run: |
-          flutter drive --verbose-system-logs -d web-server --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=desktop
+          flutter drive --verbose-system-logs -d web-server --release --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=desktop
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
@@ -106,7 +106,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: flutter pub get && flutter drive --verbose-system-logs -d emulator-5554 --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
+          script: flutter pub get && flutter drive --verbose-system-logs --release -d emulator-5554 --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
       - name: Fetch and Merge Changes from Main
         run: |
           git fetch origin main
