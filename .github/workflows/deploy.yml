@@ -106,7 +106,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: flutter pub get && flutter drive --verbose-system-logs --release -d emulator-5554 --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
+          script: flutter pub get && flutter drive --verbose-system-logs --profile -d emulator-5554 --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
       
       - name: Fetch and Merge Changes from Main
         run: |
