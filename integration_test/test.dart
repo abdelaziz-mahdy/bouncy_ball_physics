@@ -16,64 +16,47 @@ void main() {
       String.fromEnvironment('SCREENSHOT_MODE', defaultValue: 'desktop');
 
   group('Test App', () {
-    testWidgets('Test with take screenshot', (tester) async {
+    // Test for 'Line' ChoiceChip
+    testWidgets('Test with take screenshot for Line', (tester) async {
       Widget app = MyApp();
       await tester.pumpFrames(app, const Duration(seconds: 5));
 
-      // Define the labels for the ChoiceChips
-      var labels = ['Line', 'Single Triangle', 'Multiple Triangles'];
+      var label = 'Line';
+      await tester.tap(find.text(label), warnIfMissed: false);
+      await tester.pumpFrames(app, const Duration(seconds: 1));
 
-      // Tap each ChoiceChip and check if the trailShapeNotifier updates correctly
-      for (var label in labels) {
-        await tester.tap(find.text(label), warnIfMissed: false);
-        await tester.pumpFrames(app, const Duration(seconds: 1));
+      await takeScreenshot(app,
+          "test-$label-$screenshotMode".replaceAll(" ", "-"), tester, binding);
+    });
 
-        await takeScreenshot(
-            app,
-            "test-$label-$screenshotMode".replaceAll(" ", "-"),
-            tester,
-            binding);
-      }
+    // Test for 'Single Triangle' ChoiceChip
+    testWidgets('Test with take screenshot for Single Triangle',
+        (tester) async {
+      Widget app = MyApp();
+      await tester.pumpFrames(app, const Duration(seconds: 5));
+
+      var label = 'Single Triangle';
+      await tester.tap(find.text(label), warnIfMissed: false);
+      await tester.pumpFrames(app, const Duration(seconds: 1));
+
+      await takeScreenshot(app,
+          "test-$label-$screenshotMode".replaceAll(" ", "-"), tester, binding);
+    });
+
+    // Test for 'Multiple Triangles' ChoiceChip
+    testWidgets('Test with take screenshot for Multiple Triangles',
+        (tester) async {
+      Widget app = MyApp();
+      await tester.pumpFrames(app, const Duration(seconds: 5));
+
+      var label = 'Multiple Triangles';
+      await tester.tap(find.text(label), warnIfMissed: false);
+      await tester.pumpFrames(app, const Duration(seconds: 1));
+
+      await takeScreenshot(app,
+          "test-$label-$screenshotMode".replaceAll(" ", "-"), tester, binding);
     });
   });
-}
-
-Future<void> takeScreenshotForAndroid(
-    IntegrationTestWidgetsFlutterBinding binding, String name) async {
-  await integrationTestChannel.invokeMethod<void>(
-    'convertFlutterSurfaceToImage',
-    null,
-  );
-  binding.reportData ??= <String, dynamic>{};
-  binding.reportData!['screenshots'] ??= <dynamic>[];
-  integrationTestChannel.setMethodCallHandler((MethodCall call) async {
-    switch (call.method) {
-      case 'scheduleFrame':
-        PlatformDispatcher.instance.scheduleFrame();
-        break;
-    }
-    return null;
-  });
-  final List<int>? rawBytes =
-      await integrationTestChannel.invokeMethod<List<int>>(
-    'captureScreenshot',
-    <String, dynamic>{'name': name},
-  );
-  if (rawBytes == null) {
-    throw StateError(
-        'Expected a list of bytes, but instead captureScreenshot returned null');
-  }
-  final Map<String, dynamic> data = {
-    'screenshotName': name,
-    'bytes': rawBytes,
-  };
-  assert(data.containsKey('bytes'));
-  (binding.reportData!['screenshots'] as List<dynamic>).add(data);
-
-  await integrationTestChannel.invokeMethod<void>(
-    'revertFlutterImage',
-    null,
-  );
 }
 
 Future<void> takeScreenshot(
@@ -87,7 +70,9 @@ Future<void> takeScreenshot(
     await binding.takeScreenshot(name);
   } else {
     if (Platform.isAndroid) {
-      await takeScreenshotForAndroid(binding, name);
+      await binding.convertFlutterSurfaceToImage();
+      await tester.pumpFrames(app, const Duration(seconds: 1));
+      await binding.takeScreenshot(name);
     } else {
       await binding.takeScreenshot(name);
     }
