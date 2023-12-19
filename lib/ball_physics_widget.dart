@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bouncy_ball_physics/ball.dart';
+import 'package:bouncy_ball_physics/common_classes.dart';
 import 'package:bouncy_ball_physics/trail_shape_selector.dart';
 import 'package:bouncy_ball_physics/worker/worker.dart';
 import 'package:flutter/material.dart';
@@ -58,12 +59,12 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   Ball _createBall(Size size, int speed) {
     Random random = Random();
     return Ball(
-      position: Offset(size.width / 2,
+      position: CustomOffset(size.width / 2,
           size.height / 2), // Set position to center of provided size
-      velocity: Offset(
+      velocity: CustomOffset(
           random.nextDouble() * speed - 2, random.nextDouble() * speed - 2),
-      color: Color.fromRGBO(
-          random.nextInt(256), random.nextInt(256), random.nextInt(256), 1),
+      color: [
+          random.nextInt(256), random.nextInt(256), random.nextInt(256), 1],
       radius: 20,
     );
   }
@@ -87,9 +88,8 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
 
   Future<void> _updatePhysics(BuildContext context) async {
     Size size = MediaQuery.of(context).size;
-
     balls = await worker.updatePhysics(
-        balls, size, tailLength, ballLimit, noSpawnDuration, speed);
+        balls, CustomSize(size.width, size.height), tailLength, ballLimit, noSpawnDuration, speed);
 
     // Schedule the update to occur after the build phase
     WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -13,4 +13,4 @@ void main() {
   run($MyPhysicsWorkerInitializer, null, ConsoleSquadronLogger());
 }
 
-EntryPoint $getMyPhysicsWorkerActivator() => 'lib/worker/worker.web.g.dart.js';
+EntryPoint $getMyPhysicsWorkerActivator() => '/workers/worker.web.g.dart.js';

@@ -1,13 +1,12 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:bouncy_ball_physics/common_classes.dart';
 
 class Ball {
-  Offset position;
-  Offset velocity;
-  Color color;
+  CustomOffset position;
+  CustomOffset velocity;
+  List<int> color;
   double radius;
-  List<Offset> trail = [];
+  List<CustomOffset> trail = [];
   DateTime creationTime;
 
   Ball(
@@ -25,7 +24,6 @@ class Ball {
         other.velocity == velocity &&
         other.color == color &&
         other.radius == radius &&
-        listEquals(other.trail, trail) &&
         other.creationTime == creationTime;
   }
 

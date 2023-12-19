@@ -46,8 +46,8 @@ class MyPhysicsWorkerWorker extends Worker implements MyPhysicsWorker {
             platformWorkerHook: platformWorkerHook);
 
   @override
-  Future<List<Ball>> updatePhysics(List<Ball> balls, Size size, int tailLength,
-          int ballLimit, Duration noSpawnDuration, int speed) =>
+  Future<List<Ball>> updatePhysics(List<Ball> balls, CustomSize size,
+          int tailLength, int ballLimit, Duration noSpawnDuration, int speed) =>
       send(_$MyPhysicsWorkerWorkerService._$updatePhysicsId, args: [
         balls.cast<Ball>(),
         size,
@@ -58,7 +58,7 @@ class MyPhysicsWorkerWorker extends Worker implements MyPhysicsWorker {
       ]).then((_) => _.cast<Ball>());
 
   @override
-  Ball _createBall(Size size, int speed) => throw UnimplementedError();
+  Ball _createBall(CustomSize size, int speed) => throw UnimplementedError();
 }
 
 /// Worker pool for MyPhysicsWorker
@@ -72,11 +72,11 @@ class MyPhysicsWorkerWorkerPool extends WorkerPool<MyPhysicsWorkerWorker>
             concurrencySettings: concurrencySettings);
 
   @override
-  Future<List<Ball>> updatePhysics(List<Ball> balls, Size size, int tailLength,
-          int ballLimit, Duration noSpawnDuration, int speed) =>
+  Future<List<Ball>> updatePhysics(List<Ball> balls, CustomSize size,
+          int tailLength, int ballLimit, Duration noSpawnDuration, int speed) =>
       execute((w) => w.updatePhysics(
           balls, size, tailLength, ballLimit, noSpawnDuration, speed));
 
   @override
-  Ball _createBall(Size size, int speed) => throw UnimplementedError();
+  Ball _createBall(CustomSize size, int speed) => throw UnimplementedError();
 }
