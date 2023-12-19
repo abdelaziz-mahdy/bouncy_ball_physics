@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:bouncy_ball_physics/ball.dart';
 import 'package:bouncy_ball_physics/trail_shape_selector.dart';
+import 'package:bouncy_ball_physics/worker/worker.dart';
 import 'package:flutter/material.dart';
+import 'package:squadron/squadron.dart';
 
 import 'ball_painter.dart';
 
@@ -24,13 +26,16 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   DateTime? lastFrameTime;
   static const int fpsAverageCount = 60; // Average over 60 frames
   final List<double> _fpsValues = [];
-  int ballLimit = 100;
+  int ballLimit = 1000;
   int speed = 10;
   int tailLength = 100;
   Duration noSpawnDuration = const Duration(milliseconds: 100);
+  MyPhysicsWorkerWorkerPool worker = MyPhysicsWorkerWorkerPool(concurrencySettings: ConcurrencySettings.oneCpuThread);
+
   @override
   void initState() {
     super.initState();
+
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 16))
       ..repeat();
@@ -46,11 +51,12 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   resetBalls() {
     Size size =
         MediaQuery.of(context).size; // Get the size of the current context
-    balls = [_createBall(size)]; // Pass this size to _createBall
+    balls = [_createBall(size, speed)]; // Pass this size to _createBall
     ballCountNotifier.value = balls.length;
   }
 
-  Ball _createBall(Size size) {
+  Ball _createBall(Size size, int speed) {
+    Random random = Random();
     return Ball(
       position: Offset(size.width / 2,
           size.height / 2), // Set position to center of provided size
@@ -62,9 +68,7 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
     );
   }
 
-  void _updatePhysics(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    List<Ball> newBalls = [];
+  void frameCounter() {
     DateTime now = DateTime.now();
 
     if (lastFrameTime != null) {
@@ -79,47 +83,20 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
       }
     }
     lastFrameTime = now;
-    for (var ball in balls) {
-      ball.position += ball.velocity;
+  }
 
-      // Update the trail
-      ball.trail.add(ball.position);
-      if (ball.trail.length > tailLength) {
-        ball.trail.removeAt(0);
+  Future<void> _updatePhysics(BuildContext context) async {
+    Size size = MediaQuery.of(context).size;
+
+    balls = await worker.updatePhysics(
+        balls, size, tailLength, ballLimit, noSpawnDuration, speed);
+
+    // Schedule the update to occur after the build phase
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ballCountNotifier.value = balls.length;
       }
-
-      // Check for cooldown
-      bool canSpawn =
-          DateTime.now().difference(ball.creationTime) > noSpawnDuration &&
-              ballCountNotifier.value < ballLimit;
-
-      // Check for boundary collisions
-      if (ball.position.dx - ball.radius < 0 ||
-          ball.position.dx + ball.radius > size.width) {
-        ball.velocity = Offset(-ball.velocity.dx, ball.velocity.dy);
-        ball.position = Offset(
-            ball.radius + (ball.position.dx - ball.radius).abs() % size.width,
-            ball.position.dy);
-        if (canSpawn) newBalls.add(_createBall(size));
-      }
-      if (ball.position.dy - ball.radius < 0 ||
-          ball.position.dy + ball.radius > size.height) {
-        ball.velocity = Offset(ball.velocity.dx, -ball.velocity.dy);
-        ball.position = Offset(ball.position.dx,
-            ball.radius + (ball.position.dy - ball.radius).abs() % size.height);
-        if (canSpawn) newBalls.add(_createBall(size));
-      }
-    }
-
-    if (newBalls.isNotEmpty) {
-      balls.addAll(newBalls);
-      // Schedule the update to occur after the build phase
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ballCountNotifier.value = balls.length;
-        }
-      });
-    }
+    });
   }
 
   void _updateFpsAverage(double newFps) {
@@ -184,6 +161,7 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                     animation: _controller,
                     builder: (context, child) {
                       _updatePhysics(context);
+                      frameCounter();
                       return CustomPaint(
                         painter:
                             BallPainter(balls: balls, trailShape: trailShape),
