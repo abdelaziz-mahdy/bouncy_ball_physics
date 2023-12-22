@@ -24,9 +24,11 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   DateTime? lastFrameTime;
   static const int fpsAverageCount = 60; // Average over 60 frames
   final List<double> _fpsValues = [];
-  int ballLimit = 100;
+  double slidersMaxValue = 500;
+  double slidersMinValue = 1;
+  ValueNotifier<int> ballLimitNotifier = ValueNotifier(100);
   int speed = 10;
-  int tailLength = 100;
+  ValueNotifier<int> tailLengthNotifier = ValueNotifier(100);
   Duration noSpawnDuration = const Duration(milliseconds: 100);
   @override
   void initState() {
@@ -79,19 +81,27 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
       }
     }
     lastFrameTime = now;
+    if (balls.length > ballLimitNotifier.value) {
+      balls.removeRange(0, balls.length - ballLimitNotifier.value);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ballCountNotifier.value = balls.length;
+        }
+      });
+    }
     for (var ball in balls) {
       ball.position += ball.velocity;
 
       // Update the trail
       ball.trail.add(ball.position);
-      if (ball.trail.length > tailLength) {
-        ball.trail.removeAt(0);
+      if (ball.trail.length > tailLengthNotifier.value) {
+        ball.trail.removeRange(0, ball.trail.length - tailLengthNotifier.value);
       }
 
-      // Check for cooldown
-      bool canSpawn =
-          DateTime.now().difference(ball.creationTime) > noSpawnDuration &&
-              ballCountNotifier.value < ballLimit;
+      // Check for cooldown and balls limit
+      bool canSpawn = DateTime.now().difference(ball.creationTime) >
+              noSpawnDuration &&
+          (ballCountNotifier.value + newBalls.length) < ballLimitNotifier.value;
 
       // Check for boundary collisions
       if (ball.position.dx - ball.radius < 0 ||
@@ -131,6 +141,57 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
     fpsNotifier.value = averageFps;
   }
 
+  void _showSettingsPanel(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Settings"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("Balls Limit"),
+              ValueListenableBuilder(
+                  valueListenable: ballLimitNotifier,
+                  builder: (BuildContext context, int value, Widget? child) {
+                    return Slider(
+                      value: ballLimitNotifier.value.toDouble(),
+                      min: slidersMinValue,
+                      max: slidersMaxValue,
+                      divisions: (slidersMaxValue - slidersMinValue).toInt(),
+                      label: ballLimitNotifier.value.toString(),
+                      onChanged: (double value) {
+                        ballLimitNotifier.value = value.toInt();
+                      },
+                    );
+                  }),
+              const Text("Tail Length"),
+              ValueListenableBuilder(
+                  valueListenable: tailLengthNotifier,
+                  builder: (BuildContext context, int value, Widget? child) {
+                    return Slider(
+                        value: tailLengthNotifier.value.toDouble(),
+                        min: slidersMinValue,
+                        max: slidersMaxValue,
+                        divisions: (slidersMaxValue - slidersMinValue).toInt(),
+                        label: tailLengthNotifier.value.toString(),
+                        onChanged: (double value) {
+                          tailLengthNotifier.value = value.toInt();
+                        });
+                  })
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text("Close"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -139,20 +200,14 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Expanded(
-                flex: 2,
                 child:
                     TrailShapeSelector(trailShapeNotifier: trailShapeNotifier)),
             Expanded(
               child: ValueListenableBuilder<int>(
                 valueListenable: ballCountNotifier,
                 builder: (context, count, child) {
-                  return Text(
-                    'Balls: $count',
-                    style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                  );
+                  return Text('Balls: $count',
+                      style: Theme.of(context).textTheme.titleLarge);
                 },
               ),
             ),
@@ -162,12 +217,15 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                 builder: (context, fps, child) {
                   return Text(
                     'FPS: ${fps.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
+                    style: Theme.of(context).textTheme.titleLarge,
                   );
                 },
+              ),
+            ),
+            Expanded(
+              child: IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () => _showSettingsPanel(context),
               ),
             ),
           ],

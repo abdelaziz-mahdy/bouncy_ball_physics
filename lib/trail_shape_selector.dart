@@ -10,23 +10,29 @@ class TrailShapeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<TrailShape>(
-        valueListenable: trailShapeNotifier,
-        builder: (context, count, child) {
-          return Wrap(
-            spacing: 8.0,
-            children: TrailShape.values.map((shape) {
-              return ChoiceChip(
-                label: Text(_getLabelForTrailShape(shape)),
-                selected: trailShapeNotifier.value == shape,
-                onSelected: (bool selected) {
-                  if (selected) {
-                    trailShapeNotifier.value = shape;
-                  }
-                },
-              );
-            }).toList(),
-          );
-        });
+      valueListenable: trailShapeNotifier,
+      builder: (context, currentShape, child) {
+        return DropdownButton<TrailShape>(
+          value: currentShape,
+          isExpanded: true,
+          onChanged: (TrailShape? newValue) {
+            if (newValue != null) {
+              trailShapeNotifier.value = newValue;
+            }
+          },
+          items: TrailShape.values
+              .map<DropdownMenuItem<TrailShape>>((TrailShape shape) {
+            return DropdownMenuItem<TrailShape>(
+              value: shape,
+              child: Text(
+                _getLabelForTrailShape(shape),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
   }
 
   String _getLabelForTrailShape(TrailShape shape) {
