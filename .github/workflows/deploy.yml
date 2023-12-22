@@ -41,15 +41,14 @@ jobs:
       
       # - name: Build Flutter Web
       #   run: flutter build web --release --base-href "/bouncy_ball_physics/" --web-renderer canvaskit
-      - name : Clean Flutter Web
-        run: flutter clean
       - name: Build Flutter Web wasm
         run: flutter build web --wasm --release --base-href "/bouncy_ball_physics/" --web-renderer canvaskit
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/web
+          # publish_dir: ./build/web
+          publish_dir: ./build/web_wasm
       - name: Fetch and Merge Changes from Main
         run: |
           git fetch
