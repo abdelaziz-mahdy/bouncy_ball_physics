@@ -1,15 +1,8 @@
-import 'dart:math';
-
-import 'package:bouncy_ball_physics/ball.dart';
 import 'package:bouncy_ball_physics/trail_shape_selector.dart';
 import 'package:flutter/material.dart';
 
 import 'ball_painter.dart';
 
-import 'dart:math';
-import 'package:flutter/material.dart';
-import 'package:bouncy_ball_physics/ball_painter.dart';
-import 'package:bouncy_ball_physics/trail_shape_selector.dart';
 import 'package:bouncy_ball_physics/ball_physics_manager.dart';
 
 class BallPhysicsWidget extends StatefulWidget {
@@ -110,13 +103,15 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
             children: [
               const Text("Balls Limit"),
               ValueListenableBuilder(
-                  valueListenable:manager. ballLimitNotifier,
+                  valueListenable: manager.ballLimitNotifier,
                   builder: (BuildContext context, int value, Widget? child) {
                     return Slider(
                       value: manager.ballLimitNotifier.value.toDouble(),
                       min: manager.slidersMinValue,
                       max: manager.slidersMaxValue,
-                      divisions: (manager.slidersMaxValue - manager.slidersMinValue).toInt(),
+                      divisions:
+                          (manager.slidersMaxValue - manager.slidersMinValue)
+                              .toInt(),
                       label: manager.ballLimitNotifier.value.toString(),
                       onChanged: (double value) {
                         manager.ballLimitNotifier.value = value.toInt();
@@ -131,7 +126,9 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                         value: manager.tailLengthNotifier.value.toDouble(),
                         min: manager.slidersMinValue,
                         max: manager.slidersMaxValue,
-                        divisions: (manager.slidersMaxValue - manager.slidersMinValue).toInt(),
+                        divisions:
+                            (manager.slidersMaxValue - manager.slidersMinValue)
+                                .toInt(),
                         label: manager.tailLengthNotifier.value.toString(),
                         onChanged: (double value) {
                           manager.tailLengthNotifier.value = value.toInt();
@@ -153,8 +150,6 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   @override
   void dispose() {
     _controller.dispose();
-    manager.ballCountNotifier.dispose();
-    // ... [dispose other notifiers in manager]
     super.dispose();
   }
 }

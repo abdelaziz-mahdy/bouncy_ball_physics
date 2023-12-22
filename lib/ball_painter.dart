@@ -11,8 +11,7 @@ class BallPainter extends CustomPainter {
   List<Ball> balls;
   TrailShape trailShape;
 
-  BallPainter(
-      {required this.balls, this.trailShape = TrailShape.line});
+  BallPainter({required this.balls, this.trailShape = TrailShape.line});
 
   final Map<Color, Paint> _paintCache = {};
 
@@ -49,9 +48,10 @@ class BallPainter extends CustomPainter {
   }
 
   void _drawLineTrail(Canvas canvas, Ball ball, Paint paint) {
-  for (var i = 0; i < ball.trail.length - 1; i++) {
-        canvas.drawLine(ball.trail[i], ball.trail[i + 1], paint..strokeWidth = ball.radius / 10);
-      }
+    for (var i = 0; i < ball.trail.length - 1; i++) {
+      canvas.drawLine(ball.trail[i], ball.trail[i + 1],
+          paint..strokeWidth = ball.radius / 10);
+    }
   }
 
   void _drawSingleTriangleTrail(Canvas canvas, Ball ball, Paint paint) {

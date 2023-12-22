@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:bouncy_ball_physics/ball_painter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -13,15 +13,16 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   const String screenshotMode =
       String.fromEnvironment('SCREENSHOT_MODE', defaultValue: 'desktop');
-
+  
   group('Test App', () {
     // Test for 'Line' Dropdown
     testWidgets('Test with take screenshot for Line', (tester) async {
-      Widget app = MyApp();
+      Widget app = const MyApp();
       await tester.pumpFrames(app, const Duration(seconds: 5));
-
+      // try to find the dropdown
+      expect(find.byType(DropdownButton<TrailShape>), findsOneWidget);
       // Open the dropdown
-      await tester.tap(find.byType(DropdownButton));
+      await tester.tap(find.byType(DropdownButton<TrailShape>));
       await tester.pumpFrames(
           app, const Duration(milliseconds: 500)); // Adjust time as needed
 
@@ -37,11 +38,12 @@ void main() {
     // Test for 'Single Triangle' Dropdown
     testWidgets('Test with take screenshot for Single Triangle',
         (tester) async {
-      Widget app = MyApp();
+      Widget app = const MyApp();
       await tester.pumpFrames(app, const Duration(seconds: 5));
-
+      // try to find the dropdown
+      expect(find.byType(DropdownButton<TrailShape>), findsOneWidget);
       // Open the dropdown
-      await tester.tap(find.byType(DropdownButton));
+      await tester.tap(find.byType(DropdownButton<TrailShape>));
       await tester.pumpFrames(app, const Duration(milliseconds: 500));
 
       var label = 'Single Triangle';
@@ -55,11 +57,13 @@ void main() {
     // Test for 'Multiple Triangles' Dropdown
     testWidgets('Test with take screenshot for Multiple Triangles',
         (tester) async {
-      Widget app = MyApp();
+      Widget app = const MyApp();
       await tester.pumpFrames(app, const Duration(seconds: 5));
 
+      // try to find the dropdown
+      expect(find.byType(DropdownButton<TrailShape>), findsOneWidget);
       // Open the dropdown
-      await tester.tap(find.byType(DropdownButton));
+      await tester.tap(find.byType(DropdownButton<TrailShape>));
       await tester.pumpFrames(app, const Duration(milliseconds: 500));
 
       var label = 'Multiple Triangles';

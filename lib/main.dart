@@ -3,18 +3,18 @@ import 'package:bouncy_ball_physics/ball_physics_widget.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         home: Scaffold(
       appBar: AppBar(title: const Text('Ball Physics')),
-      body: BallPhysicsWidget(), // Use the key here
+      body: const BallPhysicsWidget(), // Use the key here
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Call the reset method using the key
