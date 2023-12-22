@@ -32,6 +32,7 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -68,23 +69,28 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
           ],
         ),
         Expanded(
+          flex: 2,
           child: Container(
             decoration: BoxDecoration(border: Border.all()),
-            child: ValueListenableBuilder<TrailShape>(
-              valueListenable: trailShapeNotifier,
-              builder: (context, trailShape, child) {
-                return AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) {
-                    manager.updatePhysics(context);
-                    return CustomPaint(
-                      painter: BallPainter(
-                          balls: manager.balls, trailShape: trailShape),
-                      child: Container(),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return ValueListenableBuilder<TrailShape>(
+                  valueListenable: trailShapeNotifier,
+                  builder: (context, trailShape, child) {
+                    return AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, child) {
+                        manager.updatePhysics(context, constraints.biggest);
+                        return CustomPaint(
+                          painter: BallPainter(
+                              balls: manager.balls, trailShape: trailShape),
+                          child: Container(),
+                        );
+                      },
                     );
                   },
                 );
-              },
+              }
             ),
           ),
         ),

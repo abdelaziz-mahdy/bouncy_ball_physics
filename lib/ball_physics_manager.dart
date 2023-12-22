@@ -41,8 +41,7 @@ class BallPhysicsManager {
     );
   }
 
-  void updatePhysics(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+  void updatePhysics(BuildContext context,Size widgetSize) {
     List<Ball> newBalls = [];
     DateTime now = DateTime.now();
 
@@ -82,19 +81,19 @@ class BallPhysicsManager {
 
       // Check for boundary collisions
       if (ball.position.dx - ball.radius < 0 ||
-          ball.position.dx + ball.radius > size.width) {
+          ball.position.dx + ball.radius > widgetSize.width) {
         ball.velocity = Offset(-ball.velocity.dx, ball.velocity.dy);
         ball.position = Offset(
-            ball.radius + (ball.position.dx - ball.radius).abs() % size.width,
+            ball.radius + (ball.position.dx - ball.radius).abs() % widgetSize.width,
             ball.position.dy);
-        if (canSpawn) newBalls.add(_createBall(size));
+        if (canSpawn) newBalls.add(_createBall(widgetSize));
       }
       if (ball.position.dy - ball.radius < 0 ||
-          ball.position.dy + ball.radius > size.height) {
+          ball.position.dy + ball.radius > widgetSize.height) {
         ball.velocity = Offset(ball.velocity.dx, -ball.velocity.dy);
         ball.position = Offset(ball.position.dx,
-            ball.radius + (ball.position.dy - ball.radius).abs() % size.height);
-        if (canSpawn) newBalls.add(_createBall(size));
+            ball.radius + (ball.position.dy - ball.radius).abs() % widgetSize.height);
+        if (canSpawn) newBalls.add(_createBall(widgetSize));
       }
     }
     if (newBalls.isNotEmpty) {
