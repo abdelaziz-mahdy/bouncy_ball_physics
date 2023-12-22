@@ -1,3 +1,4 @@
+import 'package:bouncy_ball_physics/ball_physics_manager.dart';
 import 'package:bouncy_ball_physics/ball_physics_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -6,8 +7,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  final GlobalKey<BallPhysicsWidgetState> ballPhysicsKey = GlobalKey();
-
   MyApp({super.key});
 
   @override
@@ -15,11 +14,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         home: Scaffold(
       appBar: AppBar(title: const Text('Ball Physics')),
-      body: BallPhysicsWidget(key: ballPhysicsKey), // Use the key here
+      body: BallPhysicsWidget(), // Use the key here
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Call the reset method using the key
-          ballPhysicsKey.currentState?.resetBalls();
+          BallPhysicsManager().resetBalls(MediaQuery.of(context).size);
         },
         child: const Icon(Icons.refresh),
       ),
