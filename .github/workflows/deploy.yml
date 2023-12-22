@@ -39,7 +39,11 @@ jobs:
         run: |
           flutter drive --verbose-system-logs -d web-server --release --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=desktop
       
-      - name: Build Flutter Web
+      # - name: Build Flutter Web
+      #   run: flutter build web --release --base-href "/bouncy_ball_physics/" --web-renderer canvaskit
+      - name : Clean Flutter Web
+        run: flutter clean
+      - name: Build Flutter Web wasm
         run: flutter build web --wasm --release --base-href "/bouncy_ball_physics/" --web-renderer canvaskit
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
