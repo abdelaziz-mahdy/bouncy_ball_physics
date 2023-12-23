@@ -56,12 +56,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Chore: update screenshot"
-          file_pattern: "**/*.png"
+          # file_pattern: "**/*.png"
           repository: .
           skip_fetch: false
-      - name: list all files
-        run: |
-          ls -a
-      - name: git changes
-        run: |
-          git status
