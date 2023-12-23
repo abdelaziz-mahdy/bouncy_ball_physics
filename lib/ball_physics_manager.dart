@@ -24,9 +24,13 @@ class BallPhysicsManager {
   Duration noSpawnDuration = const Duration(milliseconds: 100);
   DateTime? lastFrameTime;
 
+  int startingBallCount = 1;
+
   void resetBalls(Size size) {
     balls.clear();
-    balls.add(_createBall(size));
+    for (int i = 0; i < startingBallCount; i++) {
+      balls.add(_createBall(size));
+    }
     ballCountNotifier.value = balls.length;
   }
 
@@ -41,7 +45,7 @@ class BallPhysicsManager {
     );
   }
 
-  void updatePhysics(BuildContext context,Size widgetSize) {
+  void updatePhysics(BuildContext context, Size widgetSize) {
     List<Ball> newBalls = [];
     DateTime now = DateTime.now();
 
@@ -84,15 +88,18 @@ class BallPhysicsManager {
           ball.position.dx + ball.radius > widgetSize.width) {
         ball.velocity = Offset(-ball.velocity.dx, ball.velocity.dy);
         ball.position = Offset(
-            ball.radius + (ball.position.dx - ball.radius).abs() % widgetSize.width,
+            ball.radius +
+                (ball.position.dx - ball.radius).abs() % widgetSize.width,
             ball.position.dy);
         if (canSpawn) newBalls.add(_createBall(widgetSize));
       }
       if (ball.position.dy - ball.radius < 0 ||
           ball.position.dy + ball.radius > widgetSize.height) {
         ball.velocity = Offset(ball.velocity.dx, -ball.velocity.dy);
-        ball.position = Offset(ball.position.dx,
-            ball.radius + (ball.position.dy - ball.radius).abs() % widgetSize.height);
+        ball.position = Offset(
+            ball.position.dx,
+            ball.radius +
+                (ball.position.dy - ball.radius).abs() % widgetSize.height);
         if (canSpawn) newBalls.add(_createBall(widgetSize));
       }
     }

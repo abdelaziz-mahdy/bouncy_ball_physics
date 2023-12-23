@@ -12,16 +12,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: Scaffold(
-      appBar: AppBar(title: const Text('Ball Physics')),
-      body: const BallPhysicsWidget(), // Use the key here
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Call the reset method using the key
-          BallPhysicsManager().resetBalls(MediaQuery.of(context).size);
-        },
-        child: const Icon(Icons.refresh),
-      ),
-    ));
+          appBar: AppBar(title: const Text('Ball Physics')),
+          body: const BallPhysicsWidget(), // Use the key here
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              // Call the reset method using the key
+              BallPhysicsManager().resetBalls(MediaQuery.of(context).size);
+            },
+            child: const Icon(Icons.refresh),
+          ),
+        ));
   }
 }
