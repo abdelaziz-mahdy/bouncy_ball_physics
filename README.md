@@ -31,7 +31,7 @@
 ### Installation
 1. Clone the repository to your local machine:
    ```
-   git clone https://github.com/your-username/bouncy-ball-physics.git
+   git clone https://github.com/zezo357/bouncy-ball-physics.git
    ```
 2. Open the project in your preferred IDE.
 3. Run the following command in the terminal to get the necessary packages:
