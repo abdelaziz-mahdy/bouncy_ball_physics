@@ -17,9 +17,9 @@
 
 | Trail Shape         | Desktop Screenshot                                                | Mobile Screenshot                                              |
 |---------------------|-------------------------------------------------------------------|----------------------------------------------------------------|
-| Line                | ![Line Desktop](test/goldens/Line.desktop.png)                    | ![Line Mobile](test/goldens/Line.phone.png)                    |
-| Single Triangle     | ![Single Triangle Desktop](test/goldens/Single_Triangle.desktop.png) | ![Single Triangle Mobile](test/goldens/Single_Triangle.phone.png) |
-| Multiple Triangles  | ![Multiple Triangles Desktop](test/goldens/Multiple_Triangles.desktop.png) | ![Multiple Triangles Mobile](test/goldens/Multiple_Triangles.phone.png) |
+| Line                | ![Line Desktop](test/goldens/line.desktop.png)                    | ![Line Mobile](test/goldens/line.phone.png)                    |
+| Single Triangle     | ![Single Triangle Desktop](test/goldens/single_triangle.desktop.png) | ![Single Triangle Mobile](test/goldens/single_triangle.phone.png) |
+| Multiple Triangles  | ![Multiple Triangles Desktop](test/goldens/multiple_triangles.desktop.png) | ![Multiple Triangles Mobile](test/goldens/multiple_triangles.phone.png) |
 
 ## Getting Started
 

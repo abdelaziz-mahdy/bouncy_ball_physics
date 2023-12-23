@@ -59,3 +59,9 @@ jobs:
           file_pattern: "**/*.png"
           repository: .
           skip_fetch: false
+      - name: list all files
+        run: |
+          ls -a
+      - name: git changes
+        run: |
+          git status
