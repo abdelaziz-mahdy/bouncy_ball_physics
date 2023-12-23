@@ -32,7 +32,7 @@ Future<void> main() async {
     await tester
         .pump(const Duration(milliseconds: 500)); // Adjust time as needed
 
-    await multiScreenGolden(tester, label.replaceAll(' ', '_'),
+    await multiScreenGolden(tester, label.replaceAll(' ', '_').toLowerCase(),
         customPump: (tester) => tester.pumpFrames(
               app,
               Duration(seconds: 5),
@@ -59,7 +59,7 @@ Future<void> main() async {
     await tester
         .pump(const Duration(milliseconds: 500)); // Adjust time as needed
 
-    await multiScreenGolden(tester, label.replaceAll(' ', '_'),
+    await multiScreenGolden(tester, label.replaceAll(' ', '_').toLowerCase(),
         customPump: (tester) => tester.pumpFrames(app, Duration(seconds: 5)),
         devices: [
           Device.phone,
@@ -83,7 +83,7 @@ Future<void> main() async {
     await tester
         .pump(const Duration(milliseconds: 500)); // Adjust time as needed
 
-    await multiScreenGolden(tester, label.replaceAll(' ', '_'),
+    await multiScreenGolden(tester, label.replaceAll(' ', '_').toLowerCase(),
         customPump: (tester) => tester.pumpFrames(app, Duration(seconds: 5)),
         devices: [
           Device.phone,
