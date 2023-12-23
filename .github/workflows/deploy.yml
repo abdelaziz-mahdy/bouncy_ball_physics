@@ -33,11 +33,10 @@ jobs:
       - name: setup chrome
         uses: nanasess/setup-chromedriver@v2
       
-      - name: run chrome desktop screen
-        run: chromedriver --port=4444 --trace-buffer-size=100000 --window-size=1920x1080 &
-      - name: 🎯 Take desktop screenshots
+
+      - name: 🎯 Take screenshots
         run: |
-          flutter drive --verbose-system-logs -d web-server --release --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=desktop
+          flutter test --update-goldens
       
       - name: Build Flutter Web
         run: flutter build web --release --base-href "/bouncy_ball_physics/" --web-renderer canvaskit
@@ -49,48 +48,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
           # publish_dir: ./build/web_wasm
-      - name: Fetch and Merge Changes from Main
-        run: |
-          git fetch
-          git pull
-      - name: Auto Commit
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "Chore: update screenshot"
-          file_pattern: "**/*.png"
-          repository: .
-          skip_fetch: false
-
-  android_screenshots:
-    name: Take Android Screenshots
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        # api-level: [21, 23, 24, 26, 28, 29]
-        api-level: [33]
-        target: [google_apis]
-        arch: [x86_64]
-
-    steps:
-      - uses: actions/setup-java@v1
-        with:
-          java-version: "11"
-      - uses: actions/checkout@v2
-        with:
-          submodules: "true"
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: "stable"
-          cache: true
-   
-      - name: run tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          arch: ${{ matrix.arch }}
-          script: flutter pub get && flutter drive --verbose-system-logs --profile -d emulator-5554 --driver=test_driver/integration_test.dart --target=integration_test/test.dart --dart-define=SCREENSHOT_MODE=mobile
-      
       - name: Fetch and Merge Changes from Main
         run: |
           git fetch
