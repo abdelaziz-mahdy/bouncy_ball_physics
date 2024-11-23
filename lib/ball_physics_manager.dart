@@ -15,7 +15,7 @@ class BallPhysicsManager {
   final ValueNotifier<double> fpsNotifier = ValueNotifier(0.0);
   final ValueNotifier<int> ballLimitNotifier = ValueNotifier(100);
   final ValueNotifier<int> tailLengthNotifier = ValueNotifier(100);
-  double slidersMaxValue = 500;
+  double slidersMaxValue = 50000;
   double slidersMinValue = 1;
   static const int fpsAverageCount = 60;
   final List<double> _fpsValues = [];
