@@ -72,26 +72,24 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
           flex: 2,
           child: Container(
             decoration: BoxDecoration(border: Border.all()),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return ValueListenableBuilder<TrailShape>(
-                  valueListenable: trailShapeNotifier,
-                  builder: (context, trailShape, child) {
-                    return AnimatedBuilder(
-                      animation: _controller,
-                      builder: (context, child) {
-                        manager.updatePhysics(context, constraints.biggest);
-                        return CustomPaint(
-                          painter: BallPainter(
-                              balls: manager.balls, trailShape: trailShape),
-                          child: Container(),
-                        );
-                      },
-                    );
-                  },
-                );
-              }
-            ),
+            child: LayoutBuilder(builder: (context, constraints) {
+              return ValueListenableBuilder<TrailShape>(
+                valueListenable: trailShapeNotifier,
+                builder: (context, trailShape, child) {
+                  return AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      manager.updatePhysics(context, constraints.biggest);
+                      return CustomPaint(
+                        painter: BallPainter(
+                            balls: manager.balls, trailShape: trailShape),
+                        child: Container(),
+                      );
+                    },
+                  );
+                },
+              );
+            }),
           ),
         ),
       ],
@@ -113,11 +111,11 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                   builder: (BuildContext context, int value, Widget? child) {
                     return Slider(
                       value: manager.ballLimitNotifier.value.toDouble(),
-                      min: manager.slidersMinValue,
-                      max: manager.slidersMaxValue,
-                      divisions:
-                          (manager.slidersMaxValue - manager.slidersMinValue)
-                              .toInt(),
+                      min: manager.slidersBallsMinValue,
+                      max: manager.slidersBallsMaxValue,
+                      divisions: (manager.slidersBallsMaxValue -
+                              manager.slidersBallsMinValue)
+                          .toInt(),
                       label: manager.ballLimitNotifier.value.toString(),
                       onChanged: (double value) {
                         manager.ballLimitNotifier.value = value.toInt();
@@ -130,11 +128,11 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                   builder: (BuildContext context, int value, Widget? child) {
                     return Slider(
                         value: manager.tailLengthNotifier.value.toDouble(),
-                        min: manager.slidersMinValue,
-                        max: manager.slidersMaxValue,
-                        divisions:
-                            (manager.slidersMaxValue - manager.slidersMinValue)
-                                .toInt(),
+                        min: manager.slidersTailMinValue,
+                        max: manager.slidersTailMaxValue,
+                        divisions: (manager.slidersTailMaxValue -
+                                manager.slidersTailMinValue)
+                            .toInt(),
                         label: manager.tailLengthNotifier.value.toString(),
                         onChanged: (double value) {
                           manager.tailLengthNotifier.value = value.toInt();
