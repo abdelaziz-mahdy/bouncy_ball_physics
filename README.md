@@ -71,16 +71,16 @@ Results on an Apple Silicon MacBook, 120 Hz display, profile build, `Line` trail
 
 | balls × tail | Canvas | flutter_scene | Shader |
 |-------------:|-------:|--------------:|-------:|
-| 10 × 100     | 120.0  | 119.6         | 13.9   |
-| 100 × 10     | 119.9  | 80.4          | 12.3   |
-| 100 × 100    | 117.4  | 51.6          | 85.7   |
-| 300 × 300    | 20.8   | 15.0          | 14.5   |
-| 500 × 500    | 15.0   | 12.1          | 10.7   |
-| 1000 × 100   | 13.2   | 10.6          | 15.2   |
-| 1000 × 500   | 16.7   | 12.6          | 7.1    |
-| 2000 × 100   | 12.4   | 9.1           | 10.9   |
+| 10 × 100     | 120.0  | 120.1         | 13.9   |
+| 100 × 10     | 119.9  | 119.9         | 12.3   |
+| 100 × 100    | 117.4  | 120.0         | 85.7   |
+| 300 × 300    | 20.8   | 119.4         | 14.5   |
+| 500 × 500    | 15.0   | 66.1          | 10.7   |
+| 1000 × 100   | 13.2   | 104.6         | 15.2   |
+| 1000 × 500   | 16.7   | 39.2          | 7.1    |
+| 2000 × 100   | 12.4   | 48.4          | 10.9   |
 
-Canvas wins at every load. The scene renderer's cost is dominated by rebuilding one trail mesh per ball per frame (~0.1 ms per ball on the UI thread); the engine's own cull + flush is about 1 ms. The shader renderer issues one shader `drawRect` per trail segment, which on Impeller becomes a blend sub-pass each, so it is raster-bound and erratic, and at large loads a single frame can take long enough that the app appears frozen.
+The scene renderer batches every trail into one updatable mesh (one draw, no per-frame allocation), which is why it pulls ahead once segment counts get large. The shader renderer issues one shader `drawRect` per trail segment, which on Impeller becomes a blend sub-pass each, so it is raster-bound and erratic, and at large loads a single frame can take long enough that the app appears frozen.
 
 ## Contributing
 Contributions to "Bouncy Ball Physics" are welcome.
