@@ -4,7 +4,10 @@ import 'package:bouncy_ball_physics/trail_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'ball_painter.dart';
+import 'ball_scene_view.dart';
+import 'benchmark.dart';
 import 'ball_shader_painter.dart';
+import 'render_mode.dart';
 
 import 'package:bouncy_ball_physics/ball_physics_manager.dart';
 
@@ -21,8 +24,8 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   final BallPhysicsManager manager = BallPhysicsManager();
   final ValueNotifier<TrailShape> trailShapeNotifier =
       ValueNotifier(TrailShape.line);
-  final ValueNotifier<bool> useShaderRendererNotifier =
-      ValueNotifier(false);
+  final ValueNotifier<RenderMode> renderModeNotifier =
+      ValueNotifier(RenderMode.canvas);
 
   // Shader programs
   ui.FragmentProgram? ballShaderProgram;
@@ -34,8 +37,17 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 16))
       ..repeat();
-    WidgetsBinding.instance.addPostFrameCallback(
-        (_) => manager.resetBalls(MediaQuery.of(context).size));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      manager.resetBalls(MediaQuery.of(context).size);
+      if (kBenchmark) {
+        BenchmarkRunner(
+          manager: manager,
+          renderMode: renderModeNotifier,
+          trailShape: trailShapeNotifier,
+          viewSize: () => MediaQuery.of(context).size,
+        ).run();
+      }
+    });
     _loadShaders();
   }
 
@@ -94,18 +106,29 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
             decoration: BoxDecoration(border: Border.all()),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                return ValueListenableBuilder<bool>(
-                  valueListenable: useShaderRendererNotifier,
-                  builder: (context, useShader, child) {
+                return ValueListenableBuilder<RenderMode>(
+                  valueListenable: renderModeNotifier,
+                  builder: (context, mode, child) {
                     return ValueListenableBuilder<TrailShape>(
                       valueListenable: trailShapeNotifier,
                       builder: (context, trailShape, child) {
+                        if (mode == RenderMode.scene) {
+                          // SceneView drives its own frame loop; physics
+                          // advances from its per-frame tick instead of the
+                          // AnimationController.
+                          return BallSceneView(
+                            balls: manager.balls,
+                            trailShape: trailShape,
+                            onTick: () => manager.updatePhysics(
+                                context, constraints.biggest),
+                          );
+                        }
                         return AnimatedBuilder(
                           animation: _controller,
                           builder: (context, child) {
                             manager.updatePhysics(context, constraints.biggest);
                             return CustomPaint(
-                              painter: useShader
+                              painter: mode == RenderMode.shader
                                   ? BallShaderPainter(
                                       balls: manager.balls,
                                       trailShape: trailShape,
@@ -176,18 +199,25 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                   }),
               const SizedBox(height: 16),
               const Text("Renderer"),
-              ValueListenableBuilder(
-                  valueListenable: useShaderRendererNotifier,
-                  builder: (BuildContext context, bool value, Widget? child) {
-                    return SwitchListTile(
-                      title: Text(value ? 'Shader (GPU)' : 'Canvas (CPU)'),
-                      subtitle: Text(value
-                          ? 'Using GPU-accelerated shaders'
-                          : 'Using CPU canvas rendering'),
-                      value: value,
-                      onChanged: (bool newValue) {
-                        useShaderRendererNotifier.value = newValue;
+              ValueListenableBuilder<RenderMode>(
+                  valueListenable: renderModeNotifier,
+                  builder: (BuildContext context, RenderMode value, Widget? child) {
+                    return RadioGroup<RenderMode>(
+                      groupValue: value,
+                      onChanged: (m) {
+                        if (m != null) renderModeNotifier.value = m;
                       },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (final mode in RenderMode.values)
+                            RadioListTile<RenderMode>(
+                              title: Text(mode.label),
+                              subtitle: Text(mode.description),
+                              value: mode,
+                            ),
+                        ],
+                      ),
                     );
                   }),
             ],

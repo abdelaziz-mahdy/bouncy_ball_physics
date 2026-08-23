@@ -47,6 +47,41 @@
 ## Usage
 Upon launching the app, you will see animated balls bouncing around the screen. The FPS and the number of balls are displayed at the top. Use the refresh button to reset the animation.
 
+## Renderers
+
+The settings panel (gear icon) switches between three renderers that draw the same physics state:
+
+| Mode | How it draws |
+|------|--------------|
+| Canvas (CPU) | `CustomPainter` with plain `Canvas` calls |
+| Shader (GPU) | `CustomPainter` with fragment shaders (`shaders/*.frag`) |
+| flutter_scene (3D) | [`flutter_scene`](https://pub.dev/packages/flutter_scene) on Flutter GPU; balls are spheres, trails are rebuilt meshes |
+
+Flutter GPU is enabled in the iOS/macOS `Info.plist` and the Android manifest. On Windows/Linux pass `--enable-flutter-gpu` to `flutter run`.
+
+### Benchmark
+
+Run the built-in sweep (every renderer × several loads, prints `BENCH` lines, then exits):
+
+```bash
+flutter run --profile -d macos --dart-define=BENCH=true
+```
+
+Results on an Apple Silicon MacBook, 120 Hz display, profile build, `Line` trail shape, FPS averaged over 5 s after an 8 s warm-up:
+
+| balls × tail | Canvas | flutter_scene | Shader |
+|-------------:|-------:|--------------:|-------:|
+| 10 × 100     | 120.0  | 119.6         | 13.9   |
+| 100 × 10     | 119.9  | 80.4          | 12.3   |
+| 100 × 100    | 117.4  | 51.6          | 85.7   |
+| 300 × 300    | 20.8   | 15.0          | 14.5   |
+| 500 × 500    | 15.0   | 12.1          | 10.7   |
+| 1000 × 100   | 13.2   | 10.6          | 15.2   |
+| 1000 × 500   | 16.7   | 12.6          | 7.1    |
+| 2000 × 100   | 12.4   | 9.1           | 10.9   |
+
+Canvas wins at every load. The scene renderer's cost is dominated by rebuilding one trail mesh per ball per frame (~0.1 ms per ball on the UI thread); the engine's own cull + flush is about 1 ms. The shader renderer issues one shader `drawRect` per trail segment, which on Impeller becomes a blend sub-pass each, so it is raster-bound and erratic, and at large loads a single frame can take long enough that the app appears frozen.
+
 ## Contributing
 Contributions to "Bouncy Ball Physics" are welcome.
 
