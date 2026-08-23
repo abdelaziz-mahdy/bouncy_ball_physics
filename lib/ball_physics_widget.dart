@@ -1,7 +1,10 @@
+import 'dart:ui' as ui;
 import 'package:bouncy_ball_physics/trail_shape_selector.dart';
+import 'package:bouncy_ball_physics/trail_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'ball_painter.dart';
+import 'ball_shader_painter.dart';
 
 import 'package:bouncy_ball_physics/ball_physics_manager.dart';
 
@@ -18,6 +21,12 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   final BallPhysicsManager manager = BallPhysicsManager();
   final ValueNotifier<TrailShape> trailShapeNotifier =
       ValueNotifier(TrailShape.line);
+  final ValueNotifier<bool> useShaderRendererNotifier =
+      ValueNotifier(false);
+
+  // Shader programs
+  ui.FragmentProgram? ballShaderProgram;
+  ui.FragmentProgram? trailShaderProgram;
 
   @override
   void initState() {
@@ -27,6 +36,17 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
       ..repeat();
     WidgetsBinding.instance.addPostFrameCallback(
         (_) => manager.resetBalls(MediaQuery.of(context).size));
+    _loadShaders();
+  }
+
+  Future<void> _loadShaders() async {
+    try {
+      ballShaderProgram = await ui.FragmentProgram.fromAsset('shaders/ball.frag');
+      trailShaderProgram = await ui.FragmentProgram.fromAsset('shaders/trail.frag');
+      setState(() {}); // Trigger rebuild once shaders are loaded
+    } catch (e) {
+      debugPrint('Error loading shaders: $e');
+    }
   }
 
   @override
@@ -74,17 +94,31 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
             decoration: BoxDecoration(border: Border.all()),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                return ValueListenableBuilder<TrailShape>(
-                  valueListenable: trailShapeNotifier,
-                  builder: (context, trailShape, child) {
-                    return AnimatedBuilder(
-                      animation: _controller,
-                      builder: (context, child) {
-                        manager.updatePhysics(context, constraints.biggest);
-                        return CustomPaint(
-                          painter: BallPainter(
-                              balls: manager.balls, trailShape: trailShape),
-                          child: Container(),
+                return ValueListenableBuilder<bool>(
+                  valueListenable: useShaderRendererNotifier,
+                  builder: (context, useShader, child) {
+                    return ValueListenableBuilder<TrailShape>(
+                      valueListenable: trailShapeNotifier,
+                      builder: (context, trailShape, child) {
+                        return AnimatedBuilder(
+                          animation: _controller,
+                          builder: (context, child) {
+                            manager.updatePhysics(context, constraints.biggest);
+                            return CustomPaint(
+                              painter: useShader
+                                  ? BallShaderPainter(
+                                      balls: manager.balls,
+                                      trailShape: trailShape,
+                                      ballProgram: ballShaderProgram,
+                                      trailProgram: trailShaderProgram,
+                                    )
+                                  : BallPainter(
+                                      balls: manager.balls,
+                                      trailShape: trailShape,
+                                    ),
+                              child: Container(),
+                            );
+                          },
                         );
                       },
                     );
@@ -139,7 +173,23 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                         onChanged: (double value) {
                           manager.tailLengthNotifier.value = value.toInt();
                         });
-                  })
+                  }),
+              const SizedBox(height: 16),
+              const Text("Renderer"),
+              ValueListenableBuilder(
+                  valueListenable: useShaderRendererNotifier,
+                  builder: (BuildContext context, bool value, Widget? child) {
+                    return SwitchListTile(
+                      title: Text(value ? 'Shader (GPU)' : 'Canvas (CPU)'),
+                      subtitle: Text(value
+                          ? 'Using GPU-accelerated shaders'
+                          : 'Using CPU canvas rendering'),
+                      value: value,
+                      onChanged: (bool newValue) {
+                        useShaderRendererNotifier.value = newValue;
+                      },
+                    );
+                  }),
             ],
           ),
           actions: [

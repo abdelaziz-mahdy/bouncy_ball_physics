@@ -1,11 +1,6 @@
 import 'package:bouncy_ball_physics/ball.dart';
+import 'package:bouncy_ball_physics/trail_shape.dart';
 import 'package:flutter/material.dart';
-
-enum TrailShape {
-  line,
-  singleTriangle,
-  multipleTriangles,
-}
 
 class BallPainter extends CustomPainter {
   List<Ball> balls;

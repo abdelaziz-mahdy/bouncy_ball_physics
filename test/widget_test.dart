@@ -5,7 +5,7 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:bouncy_ball_physics/ball_painter.dart';
+import 'package:bouncy_ball_physics/trail_shape.dart';
 import 'package:bouncy_ball_physics/ball_physics_manager.dart';
 import 'package:bouncy_ball_physics/main.dart';
 import 'package:flutter/material.dart';
