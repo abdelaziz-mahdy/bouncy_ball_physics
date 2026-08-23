@@ -1,85 +1,73 @@
+import 'dart:ui' as ui;
+
 import 'package:bouncy_ball_physics/ball.dart';
 import 'package:bouncy_ball_physics/trail_shape.dart';
 import 'package:flutter/material.dart';
 
+/// Draws balls and trails with plain `Canvas` calls.
+///
+/// Each ball's trail is one draw: a polyline via `drawPoints` for line
+/// trails, or a single `Path` for the triangle shapes. Paints are cached per
+/// colour.
 class BallPainter extends CustomPainter {
-  List<Ball> balls;
-  TrailShape trailShape;
-
   BallPainter({required this.balls, this.trailShape = TrailShape.line});
 
-  final Map<Color, Paint> _paintCache = {};
+  final List<Ball> balls;
+  final TrailShape trailShape;
 
-  Paint _getPaintForBall(Ball ball) {
-    return _paintCache.putIfAbsent(
-      ball.color,
-      () => Paint()..color = ball.color,
-    );
-  }
+  final Map<Color, Paint> _fillCache = {};
+  final Map<Color, Paint> _strokeCache = {};
+
+  Paint _fill(Ball ball) =>
+      _fillCache.putIfAbsent(ball.color, () => Paint()..color = ball.color);
+
+  Paint _stroke(Ball ball) => _strokeCache.putIfAbsent(
+        ball.color,
+        () => Paint()
+          ..color = ball.color
+          ..strokeWidth = ball.radius / 10
+          ..style = PaintingStyle.stroke,
+      );
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (var ball in balls) {
-      final paint = _getPaintForBall(ball);
-      paint.strokeWidth = ball.radius / 10;
-
-      switch (trailShape) {
-        case TrailShape.line:
-          // Draw the trail as a line
-          _drawLineTrail(canvas, ball, paint);
-          break;
-        case TrailShape.singleTriangle:
-          // Draw the trail as a single triangle
-          _drawSingleTriangleTrail(canvas, ball, paint);
-          break;
-        case TrailShape.multipleTriangles:
-          // Draw the trail as multiple triangles
-          _drawMultipleTrianglesTrail(canvas, ball, paint);
-          break;
+    for (final ball in balls) {
+      if (ball.trail.length >= 2) {
+        switch (trailShape) {
+          case TrailShape.line:
+            canvas.drawPoints(ui.PointMode.polygon, ball.trail, _stroke(ball));
+          case TrailShape.singleTriangle:
+            canvas.drawPath(_polygonPath(ball.trail), _fill(ball));
+          case TrailShape.multipleTriangles:
+            canvas.drawPath(_fanPath(ball), _fill(ball));
+        }
       }
-
-      canvas.drawCircle(ball.position, ball.radius, paint);
+      canvas.drawCircle(ball.position, ball.radius, _fill(ball));
     }
   }
 
-  void _drawLineTrail(Canvas canvas, Ball ball, Paint paint) {
+  Path _polygonPath(List<Offset> points) {
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (var i = 1; i < points.length; i++) {
+      path.lineTo(points[i].dx, points[i].dy);
+    }
+    return path..close();
+  }
+
+  /// One path holding every `(trail[i], trail[i+1], position)` triangle.
+  Path _fanPath(Ball ball) {
+    final path = Path();
+    final apex = ball.position;
     for (var i = 0; i < ball.trail.length - 1; i++) {
-      canvas.drawLine(ball.trail[i], ball.trail[i + 1],
-          paint..strokeWidth = ball.radius / 10);
+      path
+        ..moveTo(ball.trail[i].dx, ball.trail[i].dy)
+        ..lineTo(ball.trail[i + 1].dx, ball.trail[i + 1].dy)
+        ..lineTo(apex.dx, apex.dy)
+        ..close();
     }
-  }
-
-  void _drawSingleTriangleTrail(Canvas canvas, Ball ball, Paint paint) {
-    var path = Path();
-    if (ball.trail.isNotEmpty) {
-      path.moveTo(ball.trail.first.dx, ball.trail.first.dy);
-      for (var point in ball.trail.skip(1)) {
-        path.lineTo(point.dx, point.dy);
-      }
-    }
-    canvas.drawPath(path, paint);
-  }
-
-  void _drawMultipleTrianglesTrail(Canvas canvas, Ball ball, Paint paint) {
-    for (int i = 0; i < ball.trail.length - 1; i++) {
-      _drawTriangle(
-          canvas, ball.trail[i], ball.trail[i + 1], ball.position, paint);
-    }
-  }
-
-  void _drawTriangle(
-      Canvas canvas, Offset point1, Offset point2, Offset point3, Paint paint) {
-    var path = Path();
-    path.moveTo(point1.dx, point1.dy);
-    path.lineTo(point2.dx, point2.dy);
-    path.lineTo(point3.dx, point3.dy);
-    path.close();
-
-    canvas.drawPath(path, paint);
+    return path;
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
