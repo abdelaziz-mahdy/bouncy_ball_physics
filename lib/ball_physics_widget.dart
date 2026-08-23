@@ -1,7 +1,12 @@
 import 'package:bouncy_ball_physics/trail_shape_selector.dart';
+import 'package:bouncy_ball_physics/trail_shape.dart';
 import 'package:flutter/material.dart';
 
 import 'ball_painter.dart';
+import 'ball_scene_view.dart';
+import 'benchmark.dart';
+import 'ball_vertices_painter.dart';
+import 'render_mode.dart';
 
 import 'package:bouncy_ball_physics/ball_physics_manager.dart';
 
@@ -18,6 +23,8 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   final BallPhysicsManager manager = BallPhysicsManager();
   final ValueNotifier<TrailShape> trailShapeNotifier =
       ValueNotifier(TrailShape.line);
+  final ValueNotifier<RenderMode> renderModeNotifier =
+      ValueNotifier(RenderMode.canvas);
 
   @override
   void initState() {
@@ -25,8 +32,17 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
     _controller = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 16))
       ..repeat();
-    WidgetsBinding.instance.addPostFrameCallback(
-        (_) => manager.resetBalls(MediaQuery.of(context).size));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      manager.resetBalls(MediaQuery.of(context).size);
+      if (kBenchmark) {
+        BenchmarkRunner(
+          manager: manager,
+          renderMode: renderModeNotifier,
+          trailShape: trailShapeNotifier,
+          viewSize: () => MediaQuery.of(context).size,
+        ).run();
+      }
+    });
   }
 
   @override
@@ -70,21 +86,44 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
         ),
         Expanded(
           flex: 2,
-          child: Container(
+          child: _benchSized(Container(
             decoration: BoxDecoration(border: Border.all()),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                return ValueListenableBuilder<TrailShape>(
-                  valueListenable: trailShapeNotifier,
-                  builder: (context, trailShape, child) {
-                    return AnimatedBuilder(
-                      animation: _controller,
-                      builder: (context, child) {
-                        manager.updatePhysics(context, constraints.biggest);
-                        return CustomPaint(
-                          painter: BallPainter(
-                              balls: manager.balls, trailShape: trailShape),
-                          child: Container(),
+                return ValueListenableBuilder<RenderMode>(
+                  valueListenable: renderModeNotifier,
+                  builder: (context, mode, child) {
+                    return ValueListenableBuilder<TrailShape>(
+                      valueListenable: trailShapeNotifier,
+                      builder: (context, trailShape, child) {
+                        if (mode == RenderMode.scene) {
+                          // SceneView drives its own frame loop; physics
+                          // advances from its per-frame tick instead of the
+                          // AnimationController.
+                          return BallSceneView(
+                            balls: manager.balls,
+                            trailShape: trailShape,
+                            onTick: () => manager.updatePhysics(
+                                context, constraints.biggest),
+                          );
+                        }
+                        return AnimatedBuilder(
+                          animation: _controller,
+                          builder: (context, child) {
+                            manager.updatePhysics(context, constraints.biggest);
+                            return CustomPaint(
+                              painter: mode == RenderMode.vertices
+                                  ? BallVerticesPainter(
+                                      balls: manager.balls,
+                                      trailShape: trailShape,
+                                    )
+                                  : BallPainter(
+                                      balls: manager.balls,
+                                      trailShape: trailShape,
+                                    ),
+                              child: Container(),
+                            );
+                          },
                         );
                       },
                     );
@@ -92,11 +131,17 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                 );
               }
             ),
-          ),
+          )),
         ),
       ],
     );
   }
+
+  /// The benchmark pins the render area so results do not depend on the
+  /// window size macOS restored from the previous launch.
+  Widget _benchSized(Widget child) => kBenchmark
+      ? Center(child: SizedBox(width: 700, height: 450, child: child))
+      : child;
 
   void _showSettingsPanel(BuildContext context) {
     showDialog(
@@ -139,7 +184,30 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                         onChanged: (double value) {
                           manager.tailLengthNotifier.value = value.toInt();
                         });
-                  })
+                  }),
+              const SizedBox(height: 16),
+              const Text("Renderer"),
+              ValueListenableBuilder<RenderMode>(
+                  valueListenable: renderModeNotifier,
+                  builder: (BuildContext context, RenderMode value, Widget? child) {
+                    return RadioGroup<RenderMode>(
+                      groupValue: value,
+                      onChanged: (m) {
+                        if (m != null) renderModeNotifier.value = m;
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (final mode in RenderMode.values)
+                            RadioListTile<RenderMode>(
+                              title: Text(mode.label),
+                              subtitle: Text(mode.description),
+                              value: mode,
+                            ),
+                        ],
+                      ),
+                    );
+                  }),
             ],
           ),
           actions: [

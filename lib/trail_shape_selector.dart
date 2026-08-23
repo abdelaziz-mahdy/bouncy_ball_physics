@@ -1,4 +1,4 @@
-import 'package:bouncy_ball_physics/ball_painter.dart';
+import 'package:bouncy_ball_physics/trail_shape.dart';
 import 'package:flutter/material.dart';
 
 class TrailShapeSelector extends StatelessWidget {
