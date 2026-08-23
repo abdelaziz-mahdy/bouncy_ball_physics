@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:bouncy_ball_physics/ball_physics_manager.dart';
 import 'package:bouncy_ball_physics/render_mode.dart';
@@ -12,6 +13,32 @@ import 'package:flutter/widgets.dart' show Size;
 ///
 ///     flutter run --profile -d macos --dart-define=BENCH=true
 const bool kBenchmark = bool.fromEnvironment('BENCH');
+
+/// Optional filters: `--dart-define=BENCH_MODES=scene,vertices` and
+/// `--dart-define=BENCH_LOADS=500x500,1000x100`.
+const String _benchModes = String.fromEnvironment('BENCH_MODES');
+const String _benchLoads = String.fromEnvironment('BENCH_LOADS');
+
+/// Each cell is measured this many times and the best run is reported, which
+/// filters out interference from other processes on the machine.
+const int benchRepeat = int.fromEnvironment('BENCH_REPEAT', defaultValue: 1);
+
+List<RenderMode> get benchModes => _benchModes.isEmpty
+    ? _modeOrder
+    : [
+        for (final name in _benchModes.split(','))
+          RenderMode.values.byName(name.trim()),
+      ];
+
+List<BenchConfig> get benchLoads => _benchLoads.isEmpty
+    ? benchConfigs
+    : [
+        for (final load in _benchLoads.split(','))
+          BenchConfig(
+            int.parse(load.split('x')[0]),
+            int.parse(load.split('x')[1]),
+          ),
+      ];
 
 class BenchConfig {
   const BenchConfig(this.balls, this.tail);
@@ -30,7 +57,7 @@ const benchConfigs = [
   BenchConfig(2000, 100),
 ];
 
-const _modeOrder = [RenderMode.canvas, RenderMode.scene, RenderMode.shader];
+const _modeOrder = [RenderMode.canvas, RenderMode.scene, RenderMode.vertices];
 
 /// Idle on a trivial canvas load between runs so a slow renderer's queued
 /// raster frames drain before the next measurement starts.
@@ -59,14 +86,20 @@ class BenchmarkRunner {
   Future<void> run() async {
     trailShape.value = TrailShape.line;
     debugPrint('BENCH start  warmup=${_warmup.inSeconds}s '
-        'measure=${_measure.inSeconds}s');
+        'measure=${_measure.inSeconds}s repeat=$benchRepeat');
     final results = <String>[];
-    for (final config in benchConfigs) {
-      // Shader last: its raster backlog would otherwise bleed into the next run.
-      for (final mode in _modeOrder) {
-        final fps = await _runOne(mode, config);
+    for (final config in benchLoads) {
+      for (final mode in benchModes) {
+        var fps = 0.0;
+        final runs = <double>[];
+        for (var r = 0; r < benchRepeat; r++) {
+          final run = await _runOne(mode, config);
+          runs.add(run);
+          fps = math.max(fps, run);
+        }
         final line = 'BENCH mode=${mode.name} balls=${config.balls} '
-            'tail=${config.tail} fps=${fps.toStringAsFixed(1)}';
+            'tail=${config.tail} fps=${fps.toStringAsFixed(1)}'
+            '${benchRepeat > 1 ? ' runs=${runs.map((r) => r.toStringAsFixed(1)).join('/')}' : ''}';
         debugPrint(line);
         results.add(line);
       }

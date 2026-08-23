@@ -54,33 +54,34 @@ The settings panel (gear icon) switches between three renderers that draw the sa
 | Mode | How it draws |
 |------|--------------|
 | Canvas (CPU) | `CustomPainter` with plain `Canvas` calls |
-| Shader (GPU) | `CustomPainter` with fragment shaders (`shaders/*.frag`) |
-| flutter_scene (3D) | [`flutter_scene`](https://pub.dev/packages/flutter_scene) on Flutter GPU; balls are spheres, trails are rebuilt meshes |
+| Vertices (batched) | `CustomPainter` that triangulates every trail and ball into a few `Canvas.drawVertices` batches |
+| flutter_scene (3D) | [`flutter_scene`](https://pub.dev/packages/flutter_scene) on Flutter GPU; balls are spheres, all trails share one updatable mesh |
 
 Flutter GPU is enabled in the iOS/macOS `Info.plist` and the Android manifest. On Windows/Linux pass `--enable-flutter-gpu` to `flutter run`.
 
 ### Benchmark
 
-Run the built-in sweep (every renderer × several loads, prints `BENCH` lines, then exits):
-
 ```bash
-flutter run --profile -d macos --dart-define=BENCH=true
+tool/bench.sh                                   # every renderer x every load, best of 2
+BENCH_MODES=canvas,vertices BENCH_LOADS=500x500 tool/bench.sh
 ```
 
-Results on an Apple Silicon MacBook, 120 Hz display, profile build, `Line` trail shape, FPS averaged over 5 s after an 8 s warm-up:
+The script runs a profile build with `--dart-define=BENCH=true`, which pins the render area to 700 x 450, cycles the renderers through each load (8 s warm-up, 5 s measure, 3 s drain between runs), prints one `BENCH` line per cell and exits. Keep the app window in front and the machine otherwise idle: macOS throttles occluded windows, which silently cuts results by several times.
 
-| balls × tail | Canvas | flutter_scene | Shader |
-|-------------:|-------:|--------------:|-------:|
-| 10 × 100     | 120.0  | 120.1         | 13.9   |
-| 100 × 10     | 119.9  | 119.9         | 12.3   |
-| 100 × 100    | 117.4  | 120.0         | 85.7   |
-| 300 × 300    | 20.8   | 119.4         | 14.5   |
-| 500 × 500    | 15.0   | 66.1          | 10.7   |
-| 1000 × 100   | 13.2   | 104.6         | 15.2   |
-| 1000 × 500   | 16.7   | 39.2          | 7.1    |
-| 2000 × 100   | 12.4   | 48.4          | 10.9   |
+Apple Silicon MacBook, 120 Hz display, `Line` trails, best of 2, FPS:
 
-The scene renderer batches every trail into one updatable mesh (one draw, no per-frame allocation), which is why it pulls ahead once segment counts get large. The shader renderer issues one shader `drawRect` per trail segment, which on Impeller becomes a blend sub-pass each, so it is raster-bound and erratic, and at large loads a single frame can take long enough that the app appears frozen.
+| balls × tail | Canvas | Vertices | flutter_scene |
+|-------------:|-------:|---------:|--------------:|
+| 10 × 100     | 120.0  | 119.9    | 120.1         |
+| 100 × 10     | 120.2  | 119.9    | 120.0         |
+| 100 × 100    | 27.2   | 120.0    | 119.9         |
+| 300 × 300    | 11.9   | 116.6    | 34.0          |
+| 500 × 500    | 10.7   | 43.0     | 27.3          |
+| 1000 × 100   | 9.5    | 57.5     | 20.2          |
+| 1000 × 500   | 9.5    | 32.2     | 18.3          |
+| 2000 × 100   | 10.6   | 29.4     | 13.3          |
+
+Absolute numbers on the heavier cells vary by up to 2-4x between sessions (GPU power state and window state on macOS); the ordering Vertices >= flutter_scene >= Canvas has held in every sweep. Canvas issues one draw per trail segment; the other two issue a handful of draws per frame regardless of load.
 
 ## Contributing
 Contributions to "Bouncy Ball Physics" are welcome.
