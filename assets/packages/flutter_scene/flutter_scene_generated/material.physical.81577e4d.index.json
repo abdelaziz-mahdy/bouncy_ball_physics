@@ -1,0 +1,17 @@
+{
+  "schema": 2,
+  "package": "flutter_scene",
+  "bundleName": "physical",
+  "shaderBundleFileName": "material.physical.81577e4d.shaderbundle",
+  "sidecarFileName": "material.physical.81577e4d.fmat.json",
+  "materials": {
+    "PhysicalOpaque": {
+      "entryName": "PhysicalOpaque",
+      "source": "assets/materials/physical_opaque.fmat"
+    },
+    "PhysicalTransmission": {
+      "entryName": "PhysicalTransmission",
+      "source": "assets/materials/physical_transmission.fmat"
+    }
+  }
+}
