@@ -39,6 +39,13 @@ jobs:
         run: flutter build web --release --base-href "/bouncy_ball_physics/"
       # - name: Build Flutter Web wasm
       #   run: flutter build web --wasm --release --base-href "/bouncy_ball_physics/"
+      # flutter_scene's build hook writes a `.gitignore` (`*`) next to its
+      # generated shader bundles. actions-gh-pages commits build/web with git,
+      # which honours that file and drops the bundles from the gh-pages
+      # branch, so the 3D renderer never becomes ready on the deployed site.
+      - name: Strip nested .gitignore files from the web build
+        run: find build/web -name .gitignore -type f -delete
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
