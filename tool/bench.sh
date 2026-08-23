@@ -7,7 +7,8 @@
 #
 # The app window is brought to the front after launch: macOS throttles the
 # frame rate of occluded windows, which otherwise silently cuts results by
-# several times. Leave the window in front and the machine idle while it runs.
+# several times. The display is kept awake with caffeinate for the same
+# reason. Leave the window in front and the machine idle while it runs.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -16,7 +17,7 @@ defines=(--dart-define=BENCH=true --dart-define=BENCH_REPEAT="${BENCH_REPEAT:-2}
 [[ -n "${BENCH_MODES:-}" ]] && defines+=(--dart-define=BENCH_MODES="$BENCH_MODES")
 [[ -n "${BENCH_LOADS:-}" ]] && defines+=(--dart-define=BENCH_LOADS="$BENCH_LOADS")
 
-flutter run --profile -d macos "${defines[@]}" >"$log" 2>&1 &
+caffeinate -dimsu flutter run --profile -d macos "${defines[@]}" >"$log" 2>&1 &
 runner=$!
 trap 'kill $runner 2>/dev/null || true' EXIT
 
