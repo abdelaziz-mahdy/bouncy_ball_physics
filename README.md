@@ -74,14 +74,14 @@ Apple Silicon MacBook, 120 Hz display, `Line` trails, best of 2, FPS:
 |-------------:|-------:|---------:|--------------:|
 | 10 × 100     | 120.0  | 119.9    | 120.1         |
 | 100 × 10     | 120.2  | 119.9    | 120.0         |
-| 100 × 100    | 27.2   | 120.0    | 119.9         |
+| 100 × 100    | 33.2   | 120.0    | 119.9         |
 | 300 × 300    | 11.9   | 116.6    | 34.0          |
-| 500 × 500    | 10.7   | 43.0     | 27.3          |
+| 500 × 500    | 15.4   | 43.0     | 27.3          |
 | 1000 × 100   | 9.5    | 57.5     | 20.2          |
 | 1000 × 500   | 9.5    | 32.2     | 18.3          |
 | 2000 × 100   | 10.6   | 29.4     | 13.3          |
 
-Absolute numbers on the heavier cells vary by up to 2-4x between sessions (GPU power state and window state on macOS); the ordering Vertices >= flutter_scene >= Canvas has held in every sweep. Canvas issues one draw per trail segment; the other two issue a handful of draws per frame regardless of load.
+Absolute numbers on the heavier cells vary by up to 2-4x between sessions (GPU power state and window state on macOS); the ordering Vertices >= flutter_scene >= Canvas has held in every sweep. Canvas issues one draw per ball (a `drawPoints` polyline or a `Path`), but Impeller still tessellates a stroke per segment, so it stays raster-bound; the other two issue a handful of draws per frame regardless of load.
 
 ## Contributing
 Contributions to "Bouncy Ball Physics" are welcome.
