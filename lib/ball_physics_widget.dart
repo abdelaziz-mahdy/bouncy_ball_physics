@@ -86,7 +86,7 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
         ),
         Expanded(
           flex: 2,
-          child: _benchSized(Container(
+          child: Container(
             decoration: BoxDecoration(border: Border.all()),
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -131,17 +131,11 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                 );
               }
             ),
-          )),
+          ),
         ),
       ],
     );
   }
-
-  /// The benchmark pins the render area so results do not depend on the
-  /// window size macOS restored from the previous launch.
-  Widget _benchSized(Widget child) => kBenchmark
-      ? Center(child: SizedBox(width: 700, height: 450, child: child))
-      : child;
 
   void _showSettingsPanel(BuildContext context) {
     showDialog(

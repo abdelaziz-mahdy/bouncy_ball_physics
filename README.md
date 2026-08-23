@@ -66,22 +66,22 @@ tool/bench.sh                                   # every renderer x every load, b
 BENCH_MODES=canvas,vertices BENCH_LOADS=500x500 tool/bench.sh
 ```
 
-The script runs a profile build with `--dart-define=BENCH=true`, which pins the render area to 700 x 450, cycles the renderers through each load (8 s warm-up, 5 s measure, 3 s drain between runs), prints one `BENCH` line per cell and exits. Keep the app window in front and the machine otherwise idle: macOS throttles occluded windows, which silently cuts results by several times.
+The script runs a profile build with `--dart-define=BENCH=true`, which cycles the renderers through each load (8 s warm-up, 5 s measure, 3 s drain between runs), prints one `BENCH` line per cell and exits. It keeps the display awake with `caffeinate` and fronts the app window: macOS throttles occluded windows and a sleeping display, which silently cuts results by several times. Leave the window in front and the machine idle while it runs.
 
-Apple Silicon MacBook, 120 Hz display, `Line` trails, best of 2, FPS:
+Apple Silicon MacBook, 120 Hz display, default window size, `Line` trails, best of 2, FPS:
 
 | balls × tail | Canvas | Vertices | flutter_scene |
 |-------------:|-------:|---------:|--------------:|
-| 10 × 100     | 120.0  | 119.9    | 120.1         |
-| 100 × 10     | 120.2  | 119.9    | 120.0         |
-| 100 × 100    | 33.2   | 120.0    | 119.9         |
-| 300 × 300    | 11.9   | 116.6    | 34.0          |
-| 500 × 500    | 15.4   | 43.0     | 27.3          |
-| 1000 × 100   | 9.5    | 57.5     | 20.2          |
-| 1000 × 500   | 9.5    | 32.2     | 18.3          |
-| 2000 × 100   | 10.6   | 29.4     | 13.3          |
+| 10 × 100     | 120.1  | 120.1    | 120.0         |
+| 100 × 10     | 120.0  | 120.1    | 120.0         |
+| 100 × 100    | 120.1  | 120.0    | 120.1         |
+| 300 × 300    | 20.4   | 120.1    | 120.1         |
+| 500 × 500    | 20.4   | 119.8    | 66.3          |
+| 1000 × 100   | 16.1   | 120.0    | 109.8         |
+| 1000 × 500   | 15.1   | 87.1     | 41.6          |
+| 2000 × 100   | 19.4   | 120.0    | 75.4          |
 
-Absolute numbers on the heavier cells vary by up to 2-4x between sessions (GPU power state and window state on macOS); the ordering Vertices >= flutter_scene >= Canvas has held in every sweep. Canvas issues one draw per ball (a `drawPoints` polyline or a `Path`), but Impeller still tessellates a stroke per segment, so it stays raster-bound; the other two issue a handful of draws per frame regardless of load.
+Canvas issues one draw per ball, but Impeller still tessellates a stroke per segment, so it is raster-bound past a few tens of thousands of segments. Vertices and flutter_scene issue a handful of draws per frame regardless of load; flutter_scene additionally renders every ball as a 3D sphere mesh, which is where its remaining cost goes at high ball counts.
 
 ## Contributing
 Contributions to "Bouncy Ball Physics" are welcome.
