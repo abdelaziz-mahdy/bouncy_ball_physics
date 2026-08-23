@@ -1,4 +1,3 @@
-import 'dart:ui' as ui;
 import 'package:bouncy_ball_physics/trail_shape_selector.dart';
 import 'package:bouncy_ball_physics/trail_shape.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'ball_painter.dart';
 import 'ball_scene_view.dart';
 import 'benchmark.dart';
-import 'ball_shader_painter.dart';
+import 'ball_vertices_painter.dart';
 import 'render_mode.dart';
 
 import 'package:bouncy_ball_physics/ball_physics_manager.dart';
@@ -27,10 +26,6 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
   final ValueNotifier<RenderMode> renderModeNotifier =
       ValueNotifier(RenderMode.canvas);
 
-  // Shader programs
-  ui.FragmentProgram? ballShaderProgram;
-  ui.FragmentProgram? trailShaderProgram;
-
   @override
   void initState() {
     super.initState();
@@ -48,17 +43,6 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
         ).run();
       }
     });
-    _loadShaders();
-  }
-
-  Future<void> _loadShaders() async {
-    try {
-      ballShaderProgram = await ui.FragmentProgram.fromAsset('shaders/ball.frag');
-      trailShaderProgram = await ui.FragmentProgram.fromAsset('shaders/trail.frag');
-      setState(() {}); // Trigger rebuild once shaders are loaded
-    } catch (e) {
-      debugPrint('Error loading shaders: $e');
-    }
   }
 
   @override
@@ -102,7 +86,7 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
         ),
         Expanded(
           flex: 2,
-          child: Container(
+          child: _benchSized(Container(
             decoration: BoxDecoration(border: Border.all()),
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -128,12 +112,10 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                           builder: (context, child) {
                             manager.updatePhysics(context, constraints.biggest);
                             return CustomPaint(
-                              painter: mode == RenderMode.shader
-                                  ? BallShaderPainter(
+                              painter: mode == RenderMode.vertices
+                                  ? BallVerticesPainter(
                                       balls: manager.balls,
                                       trailShape: trailShape,
-                                      ballProgram: ballShaderProgram,
-                                      trailProgram: trailShaderProgram,
                                     )
                                   : BallPainter(
                                       balls: manager.balls,
@@ -149,11 +131,17 @@ class BallPhysicsWidgetState extends State<BallPhysicsWidget>
                 );
               }
             ),
-          ),
+          )),
         ),
       ],
     );
   }
+
+  /// The benchmark pins the render area so results do not depend on the
+  /// window size macOS restored from the previous launch.
+  Widget _benchSized(Widget child) => kBenchmark
+      ? Center(child: SizedBox(width: 700, height: 450, child: child))
+      : child;
 
   void _showSettingsPanel(BuildContext context) {
     showDialog(

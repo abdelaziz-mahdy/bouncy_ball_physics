@@ -3,8 +3,8 @@ enum RenderMode {
   /// `CustomPainter` using plain `Canvas` calls.
   canvas,
 
-  /// `CustomPainter` using fragment shaders (`shaders/*.frag`).
-  shader,
+  /// `CustomPainter` batching all geometry through `Canvas.drawVertices`.
+  vertices,
 
   /// `flutter_scene` 3D engine via Flutter GPU.
   scene,
@@ -13,13 +13,13 @@ enum RenderMode {
 extension RenderModeLabel on RenderMode {
   String get label => switch (this) {
         RenderMode.canvas => 'Canvas (CPU)',
-        RenderMode.shader => 'Shader (GPU)',
+        RenderMode.vertices => 'Vertices (batched)',
         RenderMode.scene => 'flutter_scene (3D)',
       };
 
   String get description => switch (this) {
         RenderMode.canvas => 'CustomPainter with canvas draw calls',
-        RenderMode.shader => 'CustomPainter with fragment shaders',
+        RenderMode.vertices => 'CustomPainter with batched drawVertices',
         RenderMode.scene => 'flutter_scene engine on Flutter GPU',
       };
 }
